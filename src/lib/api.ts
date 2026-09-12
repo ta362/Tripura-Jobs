@@ -150,6 +150,38 @@ export const api = {
     return json.success;
   },
 
+  // Auth: Mobile OTP
+  async sendOtp(phone: string): Promise<{ success: boolean; message: string; demoOtp: string }> {
+    const res = await fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Failed to send OTP');
+    }
+    return json;
+  },
+
+  async verifyOtp(
+    phone: string,
+    otp: string,
+    fullName?: string,
+    district?: string
+  ): Promise<{ user: UserProfile; token: string }> {
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, otp, fullName, district }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Invalid OTP');
+    }
+    return json.data;
+  },
+
   // Auth
   async login(email: string, password: string): Promise<{ user: UserProfile; token: string }> {
     const res = await fetch('/api/auth/login', {
@@ -163,6 +195,43 @@ export const api = {
     }
     const json = await res.json();
     return json.data;
+  },
+
+  async adminLogin(loginId: string, password: string): Promise<{ user: UserProfile; token: string }> {
+    const res = await fetch('/api/auth/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loginId, password }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Admin authentication failed');
+    }
+    return json.data;
+  },
+
+  async getAdminInfo(): Promise<{ loginId: string; altLoginId: string; fullName: string; updatedAt: string }> {
+    const res = await fetch('/api/auth/admin/info');
+    if (!res.ok) throw new Error('Failed to fetch admin info');
+    const json = await res.json();
+    return json.data;
+  },
+
+  async changeAdminCredentials(
+    currentPassword: string,
+    newLoginId?: string,
+    newPassword?: string
+  ): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch('/api/auth/admin/change-credentials', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newLoginId, newPassword }),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.error || 'Failed to update credentials');
+    }
+    return json;
   },
 
   // Supabase Schema

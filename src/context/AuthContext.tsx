@@ -5,16 +5,22 @@ import { api } from '../lib/api';
 interface AuthContextType {
   user: UserProfile | null;
   isAdmin: boolean;
+  isAuthenticated: boolean;
+  sendPhoneOtp: (phone: string) => Promise<{ success: boolean; message: string; demoOtp: string }>;
+  verifyPhoneOtp: (phone: string, otp: string, fullName?: string, district?: string) => Promise<void>;
   login: (email: string, pass: string) => Promise<void>;
+  adminLogin: (loginId: string, pass: string) => Promise<void>;
+  adminLogout: () => void;
   signup: (email: string, pass: string, fullName: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (updated: Partial<UserProfile>) => void;
   switchRole: (role: 'admin' | 'user') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Default mock session as Administrator for full preview experience
+  // First-time visitors have no session until they login with Mobile + OTP or Admin ID
   const [user, setUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('tripura_job_user');
     if (saved) {
@@ -24,19 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // fallback
       }
     }
-    return {
-      id: 'usr-admin-01',
-      email: 'admin@tripurajobs.nic.in',
-      full_name: 'State Portal Officer (Tripura)',
-      role: 'admin',
-      preferences: {
-        notify_new_jobs: true,
-        notify_closing_soon: true,
-        notify_updates: true,
-        preferred_qualifications: ['Graduate', 'Post Graduate', 'B.Tech'],
-      },
-      created_at: new Date().toISOString(),
-    };
+    return null;
   });
 
   useEffect(() => {
@@ -47,9 +41,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
+  const sendPhoneOtp = async (phone: string) => {
+    return await api.sendOtp(phone);
+  };
+
+  const verifyPhoneOtp = async (
+    phone: string,
+    otp: string,
+    fullName?: string,
+    district?: string
+  ) => {
+    const res = await api.verifyOtp(phone, otp, fullName, district);
+    setUser(res.user);
+    localStorage.setItem('tripura_cand_token', res.token);
+  };
+
   const login = async (email: string, pass: string) => {
     const res = await api.login(email, pass);
     setUser(res.user);
+  };
+
+  const adminLogin = async (loginId: string, pass: string) => {
+    const res = await api.adminLogin(loginId, pass);
+    setUser(res.user);
+    localStorage.setItem('tripura_admin_token', res.token);
+  };
+
+  const adminLogout = () => {
+    localStorage.removeItem('tripura_admin_token');
+    if (user && user.role === 'admin') {
+      setUser(null);
+    }
   };
 
   const signup = async (email: string, pass: string, fullName: string) => {
@@ -59,7 +81,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    localStorage.removeItem('tripura_admin_token');
+    localStorage.removeItem('tripura_cand_token');
+    localStorage.removeItem('tripura_job_user');
     setUser(null);
+  };
+
+  const updateProfile = (updated: Partial<UserProfile>) => {
+    if (user) {
+      setUser({ ...user, ...updated });
+    }
   };
 
   const switchRole = (role: 'admin' | 'user') => {
@@ -69,9 +100,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = user?.role === 'admin';
+  const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, login, signup, logout, switchRole }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAdmin,
+        isAuthenticated,
+        sendPhoneOtp,
+        verifyPhoneOtp,
+        login,
+        adminLogin,
+        adminLogout,
+        signup,
+        logout,
+        updateProfile,
+        switchRole,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

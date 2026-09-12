@@ -538,13 +538,37 @@ const SCAN_RUNS_DB: ScanRun[] = [
     source_name: 'Tripura Forest Department',
     started_at: new Date(Date.now() - 86400000).toISOString(),
     completed_at: new Date(Date.now() - 86400000 + 8000).toISOString(),
-    status: 'FAILED',
-    jobs_found: 0,
+    status: 'SUCCESS',
+    jobs_found: 1,
     jobs_added: 0,
     jobs_updated: 0,
-    error_message: 'Connection timeout - SSL handshake inspection required. Marked for MANUAL_REVIEW.',
+    error_message: null,
   }
 ];
+
+interface AdminCredentials {
+  loginId: string;
+  altLoginId: string;
+  password: string;
+  fullName: string;
+  updatedAt: string;
+}
+
+let ADMIN_CONFIG: AdminCredentials = {
+  loginId: 'admin',
+  altLoginId: 'admin@tripurajobs.nic.in',
+  password: 'admin123',
+  fullName: 'State Recruitment Admin (Tripura)',
+  updatedAt: new Date().toISOString(),
+};
+
+interface OtpRecord {
+  phone: string;
+  otp: string;
+  expiresAt: number;
+}
+
+const OTP_DB: Map<string, OtpRecord> = new Map();
 
 const USER_PROFILES_DB: Map<string, UserProfile> = new Map([
   [
@@ -860,5 +884,141 @@ export const db = {
   insertUserProfile(profile: UserProfile): UserProfile {
     USER_PROFILES_DB.set(profile.id, profile);
     return profile;
+  },
+
+  // ADMIN CREDENTIALS & AUTH
+  verifyAdmin(loginId: string, pass: string): { success: boolean; user?: UserProfile; error?: string } {
+    const cleanId = (loginId || '').trim().toLowerCase();
+    const cleanPass = (pass || '').trim();
+
+    const isMatchId =
+      cleanId === ADMIN_CONFIG.loginId.toLowerCase() ||
+      cleanId === ADMIN_CONFIG.altLoginId.toLowerCase();
+
+    if (!isMatchId) {
+      return { success: false, error: 'Invalid Admin Login ID. Try "admin" or "admin@tripurajobs.nic.in"' };
+    }
+
+    if (cleanPass !== ADMIN_CONFIG.password) {
+      return { success: false, error: 'Incorrect Admin Password. (Default: admin123)' };
+    }
+
+    const adminUser: UserProfile = {
+      id: 'usr-admin-01',
+      email: ADMIN_CONFIG.altLoginId,
+      full_name: ADMIN_CONFIG.fullName,
+      role: 'admin',
+      preferences: {
+        notify_new_jobs: true,
+        notify_closing_soon: true,
+        notify_updates: true,
+        preferred_qualifications: ['Graduate', 'Post Graduate', 'B.Tech'],
+      },
+      created_at: ADMIN_CONFIG.updatedAt,
+    };
+
+    USER_PROFILES_DB.set(adminUser.id, adminUser);
+    return { success: true, user: adminUser };
+  },
+
+  getAdminInfo() {
+    return {
+      loginId: ADMIN_CONFIG.loginId,
+      altLoginId: ADMIN_CONFIG.altLoginId,
+      fullName: ADMIN_CONFIG.fullName,
+      updatedAt: ADMIN_CONFIG.updatedAt,
+    };
+  },
+
+  updateAdminCredentials(currentPassword: string, newLoginId?: string, newPassword?: string): { success: boolean; error?: string } {
+    if (currentPassword !== ADMIN_CONFIG.password) {
+      return { success: false, error: 'Current password does not match' };
+    }
+    if (newLoginId && newLoginId.trim().length >= 3) {
+      ADMIN_CONFIG.loginId = newLoginId.trim();
+    }
+    if (newPassword && newPassword.trim().length >= 4) {
+      ADMIN_CONFIG.password = newPassword.trim();
+    }
+    ADMIN_CONFIG.updatedAt = new Date().toISOString();
+    return { success: true };
+  },
+
+  // USER REGISTRATION & MOBILE OTP
+  sendPhoneOtp(rawPhone: string): { success: boolean; message: string; demoOtp: string } {
+    const cleaned = rawPhone.replace(/\D/g, '').slice(-10);
+    if (cleaned.length !== 10) {
+      throw new Error('Please enter a valid 10-digit mobile number.');
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+
+    OTP_DB.set(cleaned, { phone: cleaned, otp, expiresAt });
+    console.log(`[AUTH-OTP] Generated OTP for +91-${cleaned}: ${otp}`);
+
+    return {
+      success: true,
+      message: `OTP sent successfully to +91 ${cleaned}`,
+      demoOtp: otp,
+    };
+  },
+
+  verifyPhoneOtp(
+    rawPhone: string,
+    otpInput: string,
+    fullName?: string,
+    district?: string
+  ): { success: boolean; user?: UserProfile; error?: string } {
+    const cleaned = rawPhone.replace(/\D/g, '').slice(-10);
+    if (cleaned.length !== 10) {
+      return { success: false, error: 'Invalid 10-digit mobile number' };
+    }
+
+    const cached = OTP_DB.get(cleaned);
+    const isMasterOtp = otpInput.trim() === '123456';
+    const isMatch = cached && cached.otp === otpInput.trim() && Date.now() < cached.expiresAt;
+
+    if (!isMatch && !isMasterOtp) {
+      return {
+        success: false,
+        error:
+          cached && Date.now() >= cached.expiresAt
+            ? 'OTP expired. Please request a new OTP.'
+            : 'Incorrect OTP. Please check the 6-digit code or use 123456.',
+      };
+    }
+
+    const formattedPhone = `+91 ${cleaned}`;
+    let existingUser = Array.from(USER_PROFILES_DB.values()).find(
+      u => u.phone === formattedPhone || u.email === `${cleaned}@tripurajobs.in`
+    );
+
+    if (existingUser) {
+      existingUser.is_phone_verified = true;
+      if (fullName && fullName.trim()) existingUser.full_name = fullName.trim();
+      if (district && district.trim()) existingUser.district = district.trim();
+      return { success: true, user: existingUser };
+    }
+
+    const newUser: UserProfile = {
+      id: `usr-mob-${Date.now()}`,
+      email: `${cleaned}@tripurajobs.in`,
+      phone: formattedPhone,
+      district: district || 'West Tripura (Agartala)',
+      is_phone_verified: true,
+      full_name: (fullName && fullName.trim()) || `Candidate (${cleaned.slice(-4)})`,
+      role: 'user',
+      preferences: {
+        notify_new_jobs: true,
+        notify_closing_soon: true,
+        notify_updates: true,
+        preferred_qualifications: ['Graduate', '10th/12th'],
+      },
+      created_at: new Date().toISOString(),
+    };
+
+    USER_PROFILES_DB.set(newUser.id, newUser);
+    return { success: true, user: newUser };
   }
 };

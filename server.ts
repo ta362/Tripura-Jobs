@@ -171,6 +171,85 @@ async function startServer() {
     res.json({ success: ok });
   });
 
+  // Admin Dedicated Auth with Login ID and Password
+  app.post('/api/auth/admin/login', (req, res) => {
+    const { loginId, password } = req.body;
+    if (!loginId || !password) {
+      return res.status(400).json({ success: false, error: 'Admin Login ID and Password are required' });
+    }
+
+    const verification = db.verifyAdmin(loginId, password);
+    if (!verification.success || !verification.user) {
+      return res.status(401).json({ success: false, error: verification.error || 'Authentication failed' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: verification.user,
+        token: `admin-token-${Date.now()}`,
+      },
+    });
+  });
+
+  app.get('/api/auth/admin/info', (req, res) => {
+    const info = db.getAdminInfo();
+    res.json({ success: true, data: info });
+  });
+
+  app.post('/api/auth/admin/change-credentials', (req, res) => {
+    const { currentPassword, newLoginId, newPassword } = req.body;
+    if (!currentPassword) {
+      return res.status(400).json({ success: false, error: 'Current password is required' });
+    }
+
+    const result = db.updateAdminCredentials(currentPassword, newLoginId, newPassword);
+    if (!result.success) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+
+    res.json({ success: true, message: 'Admin credentials updated successfully' });
+  });
+
+  // Mobile & OTP Candidate Registration / Login
+  app.post('/api/auth/send-otp', (req, res) => {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ success: false, error: 'Mobile number is required' });
+    }
+
+    try {
+      const result = db.sendPhoneOtp(phone);
+      res.json({
+        success: true,
+        message: result.message,
+        demoOtp: result.demoOtp, // Delivered to client simulator for seamless experience
+      });
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: err.message || 'Failed to send OTP' });
+    }
+  });
+
+  app.post('/api/auth/verify-otp', (req, res) => {
+    const { phone, otp, fullName, district } = req.body;
+    if (!phone || !otp) {
+      return res.status(400).json({ success: false, error: 'Phone number and 6-digit OTP are required' });
+    }
+
+    const verification = db.verifyPhoneOtp(phone, otp, fullName, district);
+    if (!verification.success || !verification.user) {
+      return res.status(400).json({ success: false, error: verification.error || 'Invalid OTP' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: verification.user,
+        token: `cand-token-${Date.now()}-${verification.user.id}`,
+      },
+    });
+  });
+
   // Auth: user profile / mock Supabase auth
   app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;

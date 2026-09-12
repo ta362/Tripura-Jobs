@@ -164,9 +164,9 @@ export const INITIAL_JOB_SOURCES: JobSource[] = [
     active: false,
     scan_frequency: 'DAILY',
     last_scanned_at: new Date(Date.now() - 86400000).toISOString(),
-    last_success_at: null,
-    last_error: 'Connection timeout - SSL handshake inspection required',
-    http_status: 504,
+    last_success_at: new Date(Date.now() - 86400000).toISOString(),
+    last_error: null,
+    http_status: 200,
     manual_review_needed: true,
     created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
   }

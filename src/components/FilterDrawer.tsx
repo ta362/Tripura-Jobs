@@ -1,23 +1,21 @@
 import React from 'react';
 import { useJobs } from '../context/JobContext';
-import { Search, Filter, RotateCcw } from 'lucide-react';
+import { Search, Filter, RotateCcw, Check } from 'lucide-react';
 
 export const FilterDrawer: React.FC = () => {
   const { filters, setFilters, resetFilters } = useJobs();
 
-  const qualifications = [
-    { label: 'All Qualifications', value: 'ALL' },
-    { label: '10th / 12th Pass', value: '10th' },
-    { label: 'Polytechnic Diploma', value: 'Diploma' },
+  const quickPills = [
+    { label: 'All Jobs', value: 'ALL' },
     { label: 'Graduate / Degree', value: 'Degree' },
-    { label: 'Engineering (B.E/B.Tech)', value: 'Engineering' },
+    { label: '10th / 12th Pass', value: '10th' },
+    { label: 'Diploma', value: 'Diploma' },
+    { label: 'Engineering', value: 'Engineering' },
     { label: 'Medical (MBBS)', value: 'MBBS' },
-    { label: 'Teaching (B.Ed/TET)', value: 'B.Ed' },
-    { label: 'Ph.D. / Post Graduate', value: 'Ph.D.' },
   ];
 
   const organizations = [
-    { label: 'All Organizations', value: 'ALL' },
+    { label: 'All Organizations / Boards', value: 'ALL' },
     { label: 'Tripura Public Service Commission (TPSC)', value: 'TPSC' },
     { label: "Teachers' Recruitment Board (TRBT)", value: 'TRBT' },
     { label: 'Joint Recruitment Board (JRBT)', value: 'JRBT' },
@@ -25,21 +23,21 @@ export const FilterDrawer: React.FC = () => {
     { label: 'Directorate of Health Services', value: 'Health' },
     { label: 'High Court of Tripura', value: 'High Court' },
     { label: 'NIT Agartala / Universities', value: 'University' },
-    { label: 'Central Govt (SSC / Tripura Postings)', value: 'Staff Selection' },
+    { label: 'Central Govt in Tripura (SSC / UPSC)', value: 'Staff Selection' },
   ];
 
   const statuses = [
     { label: 'All Statuses', value: 'ALL' },
-    { label: '🔴 New Jobs Only', value: 'NEW' },
-    { label: '🟡 Updated Jobs Only', value: 'UPDATED' },
-    { label: '⏰ Closing Soon (≤ 5 days)', value: 'CLOSING_SOON' },
-    { label: '💼 Active Jobs', value: 'ACTIVE' },
+    { label: '🔴 New Notifications Only', value: 'NEW' },
+    { label: '🟡 Updated Notifications', value: 'UPDATED' },
+    { label: '⏰ Closing Soon (≤ 5 Days)', value: 'CLOSING_SOON' },
+    { label: '💼 Active Vacancies', value: 'ACTIVE' },
     { label: '📁 Expired (Reference)', value: 'EXPIRED' },
   ];
 
   return (
-    <div className="bg-slate-900 border-b border-slate-800 p-4 space-y-3">
-      {/* Search Input */}
+    <div className="bg-white border-b border-slate-200 p-4 space-y-3.5 shadow-xs">
+      {/* Search Input - Big, Clear & Easy */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
@@ -47,65 +45,55 @@ export const FilterDrawer: React.FC = () => {
           value={filters.search}
           onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
           placeholder="Search by job title, department, qualification, or advertisement number..."
-          className="w-full bg-slate-800/90 text-white placeholder-slate-400 text-sm rounded-xl pl-10 pr-10 py-2.5 border border-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+          className="w-full bg-slate-50 text-slate-900 placeholder-slate-400 text-sm rounded-xl pl-10 pr-10 py-3 border border-slate-300 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition-all font-medium"
         />
         {filters.search && (
           <button
             onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 w-5 h-5 rounded-full flex items-center justify-center"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 w-5 h-5 rounded-full flex items-center justify-center font-bold"
           >
             ×
           </button>
         )}
       </div>
 
-      {/* Filter Select Dropdowns & Quick Pills */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {/* Status */}
-        <div>
-          <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Status
-          </label>
-          <select
-            value={filters.status}
-            onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
-            className="w-full bg-slate-800 text-slate-200 text-xs rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:border-emerald-500"
-          >
-            {statuses.map(s => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Quick Qualification Pills - 1-tap filtering for mobile users */}
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+        {quickPills.map(pill => {
+          const isSelected = filters.qualification === pill.value;
+          return (
+            <button
+              key={pill.value}
+              onClick={() =>
+                setFilters(prev => ({
+                  ...prev,
+                  qualification: isSelected && pill.value !== 'ALL' ? 'ALL' : pill.value,
+                }))
+              }
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-1 ${
+                isSelected
+                  ? 'bg-emerald-700 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {isSelected && <Check className="w-3 h-3" />}
+              <span>{pill.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Qualification */}
+      {/* Dropdown Filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        {/* Organization / Board */}
         <div>
-          <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Minimum Qualification
-          </label>
-          <select
-            value={filters.qualification}
-            onChange={e => setFilters(prev => ({ ...prev, qualification: e.target.value }))}
-            className="w-full bg-slate-800 text-slate-200 text-xs rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:border-emerald-500"
-          >
-            {qualifications.map(q => (
-              <option key={q.value} value={q.value}>
-                {q.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Organization */}
-        <div>
-          <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
-            Recruitment Board / Org
+          <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+            Recruitment Board / Agency
           </label>
           <select
             value={filters.organization}
             onChange={e => setFilters(prev => ({ ...prev, organization: e.target.value }))}
-            className="w-full bg-slate-800 text-slate-200 text-xs rounded-lg px-3 py-2 border border-slate-700 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-300 font-medium focus:outline-none focus:bg-white focus:border-emerald-600"
           >
             {organizations.map(o => (
               <option key={o.value} value={o.value}>
@@ -114,20 +102,38 @@ export const FilterDrawer: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {/* Status */}
+        <div>
+          <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1">
+            Notification Status
+          </label>
+          <select
+            value={filters.status}
+            onChange={e => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            className="w-full bg-slate-50 text-slate-800 text-xs rounded-xl px-3 py-2.5 border border-slate-300 font-medium focus:outline-none focus:bg-white focus:border-emerald-600"
+          >
+            {statuses.map(s => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* Active Filter summary & Reset */}
-      <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center space-x-1.5 text-xs text-slate-400">
-          <Filter className="w-3.5 h-3.5 text-slate-500" />
-          <span>Active criteria applied</span>
+      {/* Reset & Status Summary */}
+      <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+        <div className="flex items-center space-x-1 text-slate-500 font-medium">
+          <Filter className="w-3.5 h-3.5" />
+          <span>Filters applied automatically</span>
         </div>
         <button
           onClick={resetFilters}
-          className="flex items-center space-x-1 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
+          className="flex items-center space-x-1 font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
         >
           <RotateCcw className="w-3 h-3" />
-          <span>Reset all</span>
+          <span>Reset All</span>
         </button>
       </div>
     </div>

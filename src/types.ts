@@ -88,6 +88,9 @@ export interface ScanRun {
 export interface UserProfile {
   id: string;
   email: string;
+  phone?: string;
+  district?: string;
+  is_phone_verified?: boolean;
   full_name: string;
   role: 'user' | 'admin';
   preferences: {

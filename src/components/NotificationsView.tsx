@@ -18,13 +18,13 @@ export const NotificationsView: React.FC = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'NEW_JOB':
-        return <Sparkles className="w-4 h-4 text-rose-400" />;
+        return <Sparkles className="w-4 h-4 text-rose-600" />;
       case 'DEADLINE':
-        return <Clock className="w-4 h-4 text-orange-400" />;
+        return <Clock className="w-4 h-4 text-orange-600" />;
       case 'UPDATE':
-        return <RefreshCw className="w-4 h-4 text-amber-400" />;
+        return <RefreshCw className="w-4 h-4 text-amber-600" />;
       default:
-        return <Bell className="w-4 h-4 text-blue-400" />;
+        return <Bell className="w-4 h-4 text-blue-600" />;
     }
   };
 
@@ -47,21 +47,21 @@ export const NotificationsView: React.FC = () => {
       {/* View Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-            <Bell className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-lg font-black text-slate-900 flex items-center space-x-2">
+            <Bell className="w-5 h-5 text-emerald-600" />
             <span>Recruitment Alerts & Deadlines</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5 font-medium">
             Automated alerts for new vacancies, last-date extensions, and closing deadlines
           </p>
         </div>
       </div>
 
       {notifications.length === 0 ? (
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-10 text-center space-y-2">
-          <CheckCheck className="w-8 h-8 text-emerald-400 mx-auto" />
-          <h3 className="text-sm font-bold text-white">All Caught Up</h3>
-          <p className="text-xs text-slate-400">
+        <div className="bg-white border border-slate-200 rounded-3xl p-10 text-center space-y-2 shadow-xs">
+          <CheckCheck className="w-8 h-8 text-emerald-600 mx-auto" />
+          <h3 className="text-base font-bold text-slate-900">All Caught Up</h3>
+          <p className="text-xs text-slate-500">
             No unread recruitment notifications right now. The scanner continuously monitors for updates.
           </p>
         </div>
@@ -71,15 +71,15 @@ export const NotificationsView: React.FC = () => {
             <div
               key={notif.id}
               onClick={() => handleNotificationClick(notif.job_id, notif.id)}
-              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start space-x-3 select-none ${
+              className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start space-x-3.5 select-none shadow-xs ${
                 notif.is_read
-                  ? 'bg-slate-900/40 border-slate-800 text-slate-400'
-                  : 'bg-slate-900 border-emerald-500/40 shadow-sm text-slate-200'
+                  ? 'bg-slate-50 border-slate-200 text-slate-600'
+                  : 'bg-white border-emerald-300 shadow-sm text-slate-900 ring-1 ring-emerald-100'
               }`}
             >
               <div
-                className={`p-2 rounded-xl mt-0.5 shrink-0 ${
-                  notif.is_read ? 'bg-slate-800 text-slate-500' : 'bg-slate-800 border border-slate-700'
+                className={`p-2.5 rounded-xl mt-0.5 shrink-0 ${
+                  notif.is_read ? 'bg-slate-100 text-slate-400' : 'bg-emerald-50 border border-emerald-100'
                 }`}
               >
                 {getIcon(notif.type)}
@@ -88,25 +88,25 @@ export const NotificationsView: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <h4
-                    className={`text-xs font-bold leading-tight truncate ${
-                      notif.is_read ? 'text-slate-300' : 'text-white'
+                    className={`text-xs font-black leading-tight truncate ${
+                      notif.is_read ? 'text-slate-700' : 'text-slate-900'
                     }`}
                   >
                     {notif.title}
                   </h4>
-                  <span className="text-[10px] text-slate-500 shrink-0">
+                  <span className="text-[10px] text-slate-500 font-medium shrink-0">
                     {formatTime(notif.created_at)}
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
                   {notif.message}
                 </p>
 
                 {notif.job_id && (
-                  <div className="mt-2 flex items-center space-x-1 text-[11px] text-emerald-400 font-medium">
+                  <div className="mt-2.5 flex items-center space-x-1 text-xs text-emerald-700 font-bold">
                     <span>View Notification Details</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </div>
                 )}
               </div>

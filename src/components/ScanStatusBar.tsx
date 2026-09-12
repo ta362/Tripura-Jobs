@@ -20,45 +20,43 @@ export const ScanStatusBar: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900/95 border-b border-slate-800/80 px-4 py-2 text-xs">
+    <div className="bg-white border-b border-slate-200 px-4 py-2.5 text-xs shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-2">
         {/* Left: Last scan timestamp & source stats */}
-        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-slate-300">
-          <div className="flex items-center space-x-1.5 font-medium text-slate-200">
-            <Clock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Last data update:</span>
-            <span className="text-emerald-300 font-semibold">
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-slate-600">
+          <div className="flex items-center space-x-1.5 font-medium text-slate-800">
+            <Clock className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Updated:</span>
+            <span className="text-emerald-700 font-bold">
               {formatLastScan(scannerStatus.lastScanTime)}
             </span>
           </div>
 
-          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="text-slate-300 hidden sm:inline">•</span>
 
-          <div className="flex items-center space-x-1 text-slate-400">
-            <Activity className="w-3.5 h-3.5 text-blue-400" />
-            <span>Sources scanned:</span>
-            <span className="text-slate-200 font-medium">
-              {scannerStatus.activeSources} / {scannerStatus.totalSources}
+          <div className="flex items-center space-x-1 text-slate-600">
+            <Activity className="w-3.5 h-3.5 text-blue-600" />
+            <span>Sources:</span>
+            <span className="text-slate-900 font-bold">
+              {scannerStatus.activeSources}/{scannerStatus.totalSources}
             </span>
           </div>
 
-          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="text-slate-300 hidden sm:inline">•</span>
 
-          <div className="flex items-center space-x-1 text-emerald-400">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>New:</span>
-            <span className="font-semibold">{scannerStatus.newJobsCount}</span>
+          <div className="flex items-center space-x-1 bg-rose-50 text-rose-700 px-2 py-0.5 rounded-md font-bold border border-rose-200">
+            <CheckCircle2 className="w-3 h-3 text-rose-600" />
+            <span>{scannerStatus.newJobsCount} New</span>
           </div>
 
-          <div className="flex items-center space-x-1 text-amber-400">
-            <span>Updated:</span>
-            <span className="font-semibold">{scannerStatus.updatedJobsCount}</span>
+          <div className="flex items-center space-x-1 bg-amber-50 text-amber-800 px-2 py-0.5 rounded-md font-bold border border-amber-200">
+            <span>{scannerStatus.updatedJobsCount} Updated</span>
           </div>
 
           {scannerStatus.failedSourcesCount > 0 && (
-            <div className="flex items-center space-x-1 text-rose-400 font-medium bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-800/40">
+            <div className="flex items-center space-x-1 text-rose-700 font-medium bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{scannerStatus.failedSourcesCount} source temporarily in manual review</span>
+              <span>{scannerStatus.failedSourcesCount} manual review</span>
             </div>
           )}
         </div>
@@ -68,10 +66,10 @@ export const ScanStatusBar: React.FC = () => {
           <button
             onClick={() => triggerScan()}
             disabled={isScanning}
-            className="flex items-center space-x-1 text-[11px] font-semibold bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 border border-emerald-500/30 px-2.5 py-1 rounded-md transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center space-x-1.5 text-xs font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-lg transition-all active:scale-95 disabled:opacity-50"
           >
-            <RefreshCw className={`w-3 h-3 ${isScanning ? 'animate-spin' : ''}`} />
-            <span>{isScanning ? 'Scanning Portals...' : 'Run Scanner'}</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-emerald-700 ${isScanning ? 'animate-spin' : ''}`} />
+            <span>{isScanning ? 'Scanning...' : 'Scan Now'}</span>
           </button>
         </div>
       </div>
