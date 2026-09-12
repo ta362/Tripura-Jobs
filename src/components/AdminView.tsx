@@ -21,6 +21,9 @@ import {
   User,
   CheckCircle2,
   AlertCircle,
+  ExternalLink,
+  Link2,
+  Terminal,
 } from 'lucide-react';
 
 export const AdminView: React.FC = () => {
@@ -32,6 +35,14 @@ export const AdminView: React.FC = () => {
   const [, setLoading] = useState<boolean>(true);
   const [schemaSql, setSchemaSql] = useState<string>('');
   const [copiedSchema, setCopiedSchema] = useState<boolean>(false);
+  const [supabaseInfo, setSupabaseInfo] = useState<{
+    projectUrl: string;
+    projectId: string;
+    isConnected: boolean;
+    hasKey: boolean;
+    keyType: string;
+  } | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState<boolean>(false);
 
   // Admin Credentials form state
   const [credForm, setCredForm] = useState({
@@ -156,8 +167,12 @@ export const AdminView: React.FC = () => {
 
   const handleFetchSchema = async () => {
     try {
-      const sql = await api.getSupabaseSchemaSql();
+      const [sql, sb] = await Promise.all([
+        api.getSupabaseSchemaSql(),
+        api.getSupabaseInfo(),
+      ]);
       setSchemaSql(sql);
+      setSupabaseInfo(sb);
     } catch {
       // fallback
     }
@@ -725,32 +740,121 @@ export const AdminView: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 5: Supabase Schema */}
+      {/* Tab 5: Supabase Schema & Database Connection */}
       {activeTab === 'schema' && (
-        <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Database className="w-4 h-4 text-purple-700" />
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                Supabase PostgreSQL Schema & RLS
-              </h3>
+        <div className="space-y-4">
+          {/* Supabase Project Connection Status Card */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 flex items-center space-x-2">
+                    <span>Supabase Project Connected</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                      URL Configured
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    PostgreSQL database for job notifications, source logs, and user records.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={`https://supabase.com/dashboard/project/${supabaseInfo?.projectId || 'fnanpfwiyxzgpjutqndb'}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+              >
+                <span>Open Supabase Dashboard</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
-            <button
-              onClick={handleCopySchema}
-              className="flex items-center space-x-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold transition-all"
-            >
-              {copiedSchema ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedSchema ? 'Copied to Clipboard!' : 'Copy Schema SQL'}</span>
-            </button>
+
+            {/* Project URL & Reference ID Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Project URL
+                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-slate-900 truncate">
+                    {supabaseInfo?.projectUrl || 'https://fnanpfwiyxzgpjutqndb.supabase.co'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(
+                        supabaseInfo?.projectUrl || 'https://fnanpfwiyxzgpjutqndb.supabase.co'
+                      );
+                      setCopiedUrl(true);
+                      setTimeout(() => setCopiedUrl(false), 2000);
+                    }}
+                    className="shrink-0 p-1.5 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg text-slate-600 transition-all text-xs font-bold"
+                    title="Copy Project URL"
+                  >
+                    {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                  Project Reference ID
+                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono text-xs font-bold text-slate-900">
+                    {supabaseInfo?.projectId || 'fnanpfwiyxzgpjutqndb'}
+                  </span>
+                  <span className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-lg">
+                    PostgreSQL
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* API Key Instructions */}
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 space-y-1.5">
+              <div className="flex items-center space-x-2 font-bold text-amber-950">
+                <KeyRound className="w-4 h-4 text-amber-700" />
+                <span>Next Step: Provide Publishable Key (Anon Key) or Service Key</span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-amber-900/90 font-medium">
+                Your Project URL is now loaded. In your screenshot, the <strong>Publishable key</strong> was truncated with <code>...</code>.
+                In your Supabase project (Settings &rarr; API), copy the full <strong>anon public</strong> or <strong>service_role</strong> key and add it to your environment as <code>SUPABASE_ANON_KEY</code> to enable live cloud sync.
+              </p>
+            </div>
           </div>
 
-          <p className="text-xs text-slate-600 leading-relaxed font-medium">
-            Paste this SQL script directly into your Supabase SQL Editor. It provisions all 7 production tables with Row Level Security (RLS) policies.
-          </p>
+          {/* Supabase SQL Schema Editor Helper */}
+          <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Terminal className="w-4 h-4 text-purple-700" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Supabase PostgreSQL Schema & RLS Policies
+                </h3>
+              </div>
+              <button
+                onClick={handleCopySchema}
+                className="flex items-center space-x-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold transition-all"
+              >
+                {copiedSchema ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedSchema ? 'Copied to Clipboard!' : 'Copy Schema SQL'}</span>
+              </button>
+            </div>
 
-          <pre className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-96 leading-relaxed select-all">
-            {schemaSql || '-- Loading schema definition...'}
-          </pre>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Copy this SQL script and paste it into your <strong>Supabase SQL Editor</strong> (in project <code>fnanpfwiyxzgpjutqndb</code>). It creates all required tables (<code>jobs</code>, <code>job_sources</code>, <code>user_profiles</code>, <code>user_notifications</code>) with security policies.
+            </p>
+
+            <pre className="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-emerald-400 font-mono text-[11px] overflow-x-auto max-h-96 leading-relaxed select-all">
+              {schemaSql || '-- Loading schema definition...'}
+            </pre>
+          </div>
         </div>
       )}
     </div>

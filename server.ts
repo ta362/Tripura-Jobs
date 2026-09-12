@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
@@ -14,12 +15,29 @@ async function startServer() {
   // API ROUTES
   // ==========================================
 
-  // Health check
+  // Health check & Supabase configuration status
   app.get('/api/health', (req, res) => {
+    const sbInfo = db.getSupabaseInfo ? db.getSupabaseInfo() : null;
     res.json({
       status: 'ok',
       service: 'Tripura Govt Job Scanner API',
       timestamp: new Date().toISOString(),
+      supabase: sbInfo,
+    });
+  });
+
+  // Supabase project status
+  app.get('/api/supabase/info', (req, res) => {
+    const sbInfo = db.getSupabaseInfo ? db.getSupabaseInfo() : {
+      projectUrl: 'https://fnanpfwiyxzgpjutqndb.supabase.co',
+      projectId: 'fnanpfwiyxzgpjutqndb',
+      isConnected: false,
+      hasKey: false,
+      keyType: 'none',
+    };
+    res.json({
+      success: true,
+      data: sbInfo,
     });
   });
 

@@ -12,20 +12,34 @@ import {
 import { INITIAL_JOB_SOURCES } from './scanner/sources.js';
 import { DuplicateDetector } from './scanner/duplicateDetector.js';
 
-// Supabase client instance (if configured by environment)
+// Supabase client instance (configured with project URL https://fnanpfwiyxzgpjutqndb.supabase.co)
+export const DEFAULT_SUPABASE_PROJECT_URL = 'https://fnanpfwiyxzgpjutqndb.supabase.co';
 let supabaseClient: SupabaseClient | null = null;
 
 export function getSupabase(): SupabaseClient | null {
-  if (!supabaseClient && process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)) {
+  const url = process.env.SUPABASE_URL || DEFAULT_SUPABASE_PROJECT_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  if (!supabaseClient && url && key) {
     try {
-      const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!;
-      supabaseClient = createClient(process.env.SUPABASE_URL, key);
-      console.log('Connected to remote Supabase database instance');
+      supabaseClient = createClient(url, key);
+      console.log('Connected to remote Supabase database instance at', url);
     } catch (err) {
       console.warn('Failed to initialize Supabase client:', err);
     }
   }
   return supabaseClient;
+}
+
+export function getSupabaseInfo() {
+  const url = process.env.SUPABASE_URL || DEFAULT_SUPABASE_PROJECT_URL;
+  const hasKey = !!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY);
+  return {
+    projectUrl: url,
+    projectId: 'fnanpfwiyxzgpjutqndb',
+    isConnected: !!supabaseClient,
+    hasKey,
+    keyType: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'service_role' : (process.env.SUPABASE_ANON_KEY ? 'anon_publishable' : 'none'),
+  };
 }
 
 // Initial realistic Tripura Government jobs with verified official URLs
@@ -1020,5 +1034,9 @@ export const db = {
 
     USER_PROFILES_DB.set(newUser.id, newUser);
     return { success: true, user: newUser };
+  },
+
+  getSupabaseInfo() {
+    return getSupabaseInfo();
   }
 };

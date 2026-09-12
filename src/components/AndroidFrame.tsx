@@ -2,6 +2,7 @@ import React from 'react';
 import { useJobs } from '../context/JobContext';
 import { useAuth } from '../context/AuthContext';
 import { Header } from './Header';
+import { SidebarDrawer } from './SidebarDrawer';
 import {
   Briefcase,
   Search,
@@ -9,17 +10,28 @@ import {
   Bell,
   Shield,
   User,
+  Building2,
 } from 'lucide-react';
 
 interface AndroidFrameProps {
   children: React.ReactNode;
 }
 
+const TRIPURA_DEPARTMENTS = [
+  { name: 'TPSC', filterOrg: 'Tripura Public Service Commission' },
+  { name: 'JRBT', filterOrg: 'Joint Recruitment Board Tripura' },
+  { name: 'Health & Family Welfare', filterOrg: 'Health & Family Welfare' },
+  { name: 'Education Dept', filterOrg: 'Education (School) Department' },
+  { name: 'Tripura Police', filterOrg: 'Tripura Police Department' },
+  { name: 'High Court', filterOrg: 'High Court of Tripura' },
+];
+
 export const AndroidFrame: React.FC<AndroidFrameProps> = ({ children }) => {
   const {
     activeTab,
     setActiveTab,
     unreadNotificationsCount,
+    setFilters,
   } = useJobs();
   const { isAdmin } = useAuth();
 
@@ -49,6 +61,9 @@ export const AndroidFrame: React.FC<AndroidFrameProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-emerald-500 selection:text-white">
+      {/* Swipeable & Collapsible Full Menu Drawer */}
+      <SidebarDrawer />
+
       {/* Top Header */}
       <Header />
 
@@ -84,6 +99,29 @@ export const AndroidFrame: React.FC<AndroidFrameProps> = ({ children }) => {
                 </button>
               );
             })}
+
+            {/* Department Shortcuts in Desktop Sidebar */}
+            <div className="pt-4 mt-4 border-t border-slate-200">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 block mb-2 flex items-center justify-between">
+                <span>Tripura Portals</span>
+                <Building2 className="w-3.5 h-3.5" />
+              </span>
+              <div className="space-y-1">
+                {TRIPURA_DEPARTMENTS.map(dept => (
+                  <button
+                    key={dept.name}
+                    type="button"
+                    onClick={() => {
+                      setFilters(prev => ({ ...prev, organization: dept.filterOrg, search: '' }));
+                      setActiveTab('home');
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 transition-colors flex items-center justify-between"
+                  >
+                    <span className="truncate">{dept.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </aside>
 

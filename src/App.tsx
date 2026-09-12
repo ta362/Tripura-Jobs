@@ -3,8 +3,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { JobProvider, useJobs } from './context/JobContext';
 import { AndroidFrame } from './components/AndroidFrame';
 import { UserAuthScreen } from './components/UserAuthScreen';
-import { ScanStatusBar } from './components/ScanStatusBar';
-import { StatCards } from './components/StatCards';
 import { FilterDrawer } from './components/FilterDrawer';
 import { JobCard } from './components/JobCard';
 import { JobDetailsModal } from './components/JobDetailsModal';
@@ -41,12 +39,6 @@ const MainAppContent: React.FC = () => {
       case 'home':
         return (
           <div className="space-y-0">
-            {/* Real-time telemetry scan bar */}
-            <ScanStatusBar />
-
-            {/* Metric Filter Cards */}
-            <StatCards />
-
             {/* Section Header */}
             <div className="p-4 pb-2.5 flex items-center justify-between">
               <div className="flex items-center space-x-2">

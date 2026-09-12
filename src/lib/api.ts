@@ -234,7 +234,20 @@ export const api = {
     return json;
   },
 
-  // Supabase Schema
+  // Supabase Schema & Info
+  async getSupabaseInfo(): Promise<{
+    projectUrl: string;
+    projectId: string;
+    isConnected: boolean;
+    hasKey: boolean;
+    keyType: string;
+  }> {
+    const res = await fetch('/api/supabase/info');
+    if (!res.ok) throw new Error('Failed to fetch Supabase status');
+    const json = await res.json();
+    return json.data;
+  },
+
   async getSupabaseSchemaSql(): Promise<string> {
     const res = await fetch('/api/schema.sql');
     if (!res.ok) throw new Error('Failed to fetch schema');

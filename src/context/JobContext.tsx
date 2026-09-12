@@ -26,6 +26,9 @@ interface JobContextType {
   setDeviceView: (mode: 'android' | 'desktop') => void;
   activeTab: 'home' | 'search' | 'saved' | 'notifications' | 'admin' | 'profile';
   setActiveTab: (tab: 'home' | 'search' | 'saved' | 'notifications' | 'admin' | 'profile') => void;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (open: boolean) => void;
+  toggleSidebar: () => void;
 }
 
 const defaultFilters: FilterOptions = {
@@ -51,6 +54,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [deviceView, setDeviceView] = useState<'android' | 'desktop'>('android');
   const [activeTab, setActiveTab] = useState<'home' | 'search' | 'saved' | 'notifications' | 'admin' | 'profile'>('home');
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarOpen(prev => !prev);
+  }, []);
 
   const refreshJobs = useCallback(async () => {
     try {
@@ -174,6 +182,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setDeviceView,
         activeTab,
         setActiveTab,
+        isSidebarOpen,
+        setIsSidebarOpen,
+        toggleSidebar,
       }}
     >
       {children}
