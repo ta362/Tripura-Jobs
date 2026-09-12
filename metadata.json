@@ -1,0 +1,6 @@
+{
+  "name": "Tripura Govt Job Scanner",
+  "description": "Daily automated scanner and notification system for official Tripura Government recruitment portals, job updates, and deadlines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
