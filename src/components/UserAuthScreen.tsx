@@ -39,7 +39,7 @@ export const UserAuthScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeOtpCode, setActiveOtpCode] = useState<string>('');
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(180);
   const [canResend, setCanResend] = useState(false);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export const UserAuthScreen: React.FC = () => {
       const res = await sendPhoneOtp(cleanPhone);
       setActiveOtpCode(res.demoOtp);
       setStep('otp');
-      setTimer(30);
+      setTimer(180);
       setCanResend(false);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to send OTP. Please try again.');
@@ -95,18 +95,10 @@ export const UserAuthScreen: React.FC = () => {
     }
   };
 
-  const handleAutoFillDemo = () => {
-    setPhone('9862012345');
-    setFullName('Rajib Debbarma');
-    setDistrict('West Tripura (Agartala)');
-    setErrorMsg(null);
-  };
-
-  const handleAutoFillOtp = () => {
-    if (activeOtpCode) {
-      setOtp(activeOtpCode);
-      setErrorMsg(null);
-    }
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   return (
@@ -305,36 +297,6 @@ export const UserAuthScreen: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Simulated SMS Notification Delivery Box */}
-                {activeOtpCode && (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1.5 text-xs font-extrabold text-emerald-900">
-                        <BellRing className="w-4 h-4 text-emerald-700" />
-                        <span>Simulated SMS Delivery</span>
-                      </div>
-                      <span className="text-[10px] bg-emerald-200/60 text-emerald-800 font-bold px-2 py-0.5 rounded-md">
-                        GOV-TRIPURA
-                      </span>
-                    </div>
-                    <p className="text-xs text-emerald-950 font-mono bg-white p-2 rounded-xl border border-emerald-200/80 leading-relaxed">
-                      OTP for Tripura Job Portal verification is{' '}
-                      <span className="font-black text-emerald-800 text-sm tracking-wider">{activeOtpCode}</span>.
-                      Valid for 10 minutes. Do not share.
-                    </p>
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handleAutoFillOtp}
-                        className="inline-flex items-center space-x-1 px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow-2xs transition-all active:scale-95"
-                      >
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Auto-Fill Code ({activeOtpCode})</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 {errorMsg && (
                   <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-start space-x-2.5 text-xs font-semibold">
                     <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -364,7 +326,7 @@ export const UserAuthScreen: React.FC = () => {
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-500 font-medium">
                       {timer > 0 ? (
-                        <span>Resend OTP in <strong className="text-slate-700 font-mono">{timer}s</strong></span>
+                        <span>Resend OTP in <strong className="text-slate-700 font-mono">{formatTime(timer)}</strong></span>
                       ) : (
                         <span>Didn't receive code?</span>
                       )}
