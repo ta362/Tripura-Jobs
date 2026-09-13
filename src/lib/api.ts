@@ -157,8 +157,15 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone }),
     });
+    if (!res.ok) {
+      throw new Error(`Server connection issue (${res.status}). Please restart or refresh.`);
+    }
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Unexpected response from server. Please try again.');
+    }
     const json = await res.json();
-    if (!res.ok || !json.success) {
+    if (!json.success) {
       throw new Error(json.error || 'Failed to send OTP');
     }
     return json;
@@ -175,8 +182,15 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone, otp, fullName, district }),
     });
+    if (!res.ok) {
+      throw new Error(`Verification request failed (${res.status}).`);
+    }
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Unexpected response during verification. Please try again.');
+    }
     const json = await res.json();
-    if (!res.ok || !json.success) {
+    if (!json.success) {
       throw new Error(json.error || 'Invalid OTP');
     }
     return json.data;
@@ -190,8 +204,12 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Authentication failed');
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const err = await res.json();
+        throw new Error(err.error || 'Authentication failed');
+      }
+      throw new Error(`Authentication server error (${res.status})`);
     }
     const json = await res.json();
     return json.data;
@@ -203,8 +221,16 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ loginId, password }),
     });
+    if (!res.ok) {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const json = await res.json();
+        throw new Error(json.error || 'Admin authentication failed');
+      }
+      throw new Error(`Admin login server error (${res.status})`);
+    }
     const json = await res.json();
-    if (!res.ok || !json.success) {
+    if (!json.success) {
       throw new Error(json.error || 'Admin authentication failed');
     }
     return json.data;
