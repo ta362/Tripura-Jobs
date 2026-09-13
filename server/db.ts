@@ -966,11 +966,15 @@ export const db = {
       throw new Error('Please enter a valid email or phone number.');
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
+    // Cryptographically generate a stateless OTP based on the current 10-minute window
+    const OTP_SECRET = process.env.EMAIL_PASS || 'tripura-jobs-secret-key-12345';
+    const window = Math.floor(Date.now() / (10 * 60 * 1000));
+    const data = `${identifier}-${window}-${OTP_SECRET}`;
+    const hash = crypto.createHash('sha256').update(data).digest('hex');
+    const otpNum = (parseInt(hash.substring(0, 8), 16) % 900000) + 100000;
+    const otp = otpNum.toString();
 
-    OTP_DB.set(identifier, { phone: identifier, otp, expiresAt });
-    console.log(`[AUTH-OTP] Generated OTP for ${identifier}: ${otp}`);
+    console.log(`[AUTH-OTP] Generated stateless OTP for ${identifier}: ${otp}`);
 
     // Trigger SMTP email sending in background if it's an email
     if (identifier.includes('@')) {
@@ -1005,17 +1009,25 @@ export const db = {
       return { success: false, error: 'Invalid identifier' };
     }
 
-    const cached = OTP_DB.get(identifier);
-    const isMasterOtp = otpInput.trim() === '123456';
-    const isMatch = cached && cached.otp === otpInput.trim() && Date.now() < cached.expiresAt;
+    const OTP_SECRET = process.env.EMAIL_PASS || 'tripura-jobs-secret-key-12345';
+    const trimInput = otpInput.trim();
+
+    // Verify statelessly against current and previous 10-minute window
+    const windowCurrent = Math.floor(Date.now() / (10 * 60 * 1000));
+    const hashCurrent = crypto.createHash('sha256').update(`${identifier}-${windowCurrent}-${OTP_SECRET}`).digest('hex');
+    const otpCurrent = ((parseInt(hashCurrent.substring(0, 8), 16) % 900000) + 100000).toString();
+
+    const windowPrev = windowCurrent - 1;
+    const hashPrev = crypto.createHash('sha256').update(`${identifier}-${windowPrev}-${OTP_SECRET}`).digest('hex');
+    const otpPrev = ((parseInt(hashPrev.substring(0, 8), 16) % 900000) + 100000).toString();
+
+    const isMasterOtp = trimInput === '123456';
+    const isMatch = trimInput === otpCurrent || trimInput === otpPrev;
 
     if (!isMatch && !isMasterOtp) {
       return {
         success: false,
-        error:
-          cached && Date.now() >= cached.expiresAt
-            ? 'OTP expired. Please request a new OTP.'
-            : 'Incorrect OTP. Please check the 6-digit code or use 123456.',
+        error: 'Incorrect OTP. Please check the 6-digit code or use 123456.',
       };
     }
 
