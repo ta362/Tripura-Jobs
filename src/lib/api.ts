@@ -150,12 +150,12 @@ export const api = {
     return json.success;
   },
 
-  // Auth: Mobile OTP
-  async sendOtp(phone: string): Promise<{ success: boolean; message: string; demoOtp: string }> {
+  // Auth: Email OTP
+  async sendOtp(email: string): Promise<{ success: boolean; message: string; demoOtp: string }> {
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ email }),
     });
     if (!res.ok) {
       throw new Error(`Server connection issue (${res.status}). Please restart or refresh.`);
@@ -172,7 +172,7 @@ export const api = {
   },
 
   async verifyOtp(
-    phone: string,
+    email: string,
     otp: string,
     fullName?: string,
     district?: string
@@ -180,7 +180,7 @@ export const api = {
     const res = await fetch('/api/auth/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, otp, fullName, district }),
+      body: JSON.stringify({ email, otp, fullName, district }),
     });
     if (!res.ok) {
       throw new Error(`Verification request failed (${res.status}).`);

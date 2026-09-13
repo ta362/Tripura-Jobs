@@ -229,15 +229,16 @@ async function startServer() {
     res.json({ success: true, message: 'Admin credentials updated successfully' });
   });
 
-  // Mobile & OTP Candidate Registration / Login
+  // Email & OTP Candidate Registration / Login
   app.post('/api/auth/send-otp', (req, res) => {
-    const { phone } = req.body;
-    if (!phone) {
-      return res.status(400).json({ success: false, error: 'Mobile number is required' });
+    const { email, phone } = req.body;
+    const target = email || phone;
+    if (!target) {
+      return res.status(400).json({ success: false, error: 'Email address is required' });
     }
 
     try {
-      const result = db.sendPhoneOtp(phone);
+      const result = db.sendPhoneOtp(target);
       res.json({
         success: true,
         message: result.message,
@@ -249,12 +250,13 @@ async function startServer() {
   });
 
   app.post('/api/auth/verify-otp', (req, res) => {
-    const { phone, otp, fullName, district } = req.body;
-    if (!phone || !otp) {
-      return res.status(400).json({ success: false, error: 'Phone number and 6-digit OTP are required' });
+    const { email, phone, otp, fullName, district } = req.body;
+    const target = email || phone;
+    if (!target || !otp) {
+      return res.status(400).json({ success: false, error: 'Email address and 6-digit OTP are required' });
     }
 
-    const verification = db.verifyPhoneOtp(phone, otp, fullName, district);
+    const verification = db.verifyPhoneOtp(target, otp, fullName, district);
     if (!verification.success || !verification.user) {
       return res.status(400).json({ success: false, error: verification.error || 'Invalid OTP' });
     }

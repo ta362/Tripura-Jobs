@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { sendOtpEmail } from './mailer.js';
 import {
   JobRecord,
   JobSource,
@@ -958,38 +959,53 @@ export const db = {
     return { success: true };
   },
 
-  // USER REGISTRATION & MOBILE OTP
-  sendPhoneOtp(rawPhone: string): { success: boolean; message: string; demoOtp: string } {
-    const cleaned = rawPhone.replace(/\D/g, '').slice(-10);
-    if (cleaned.length !== 10) {
-      throw new Error('Please enter a valid 10-digit mobile number.');
+  // USER REGISTRATION & EMAIL OTP
+  sendPhoneOtp(emailOrPhone: string): { success: boolean; message: string; demoOtp: string } {
+    const identifier = emailOrPhone.trim().toLowerCase();
+    if (!identifier) {
+      throw new Error('Please enter a valid email or phone number.');
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 10 * 60 * 1000; // 10 mins
 
-    OTP_DB.set(cleaned, { phone: cleaned, otp, expiresAt });
-    console.log(`[AUTH-OTP] Generated OTP for +91-${cleaned}: ${otp}`);
+    OTP_DB.set(identifier, { phone: identifier, otp, expiresAt });
+    console.log(`[AUTH-OTP] Generated OTP for ${identifier}: ${otp}`);
+
+    // Trigger SMTP email sending in background if it's an email
+    if (identifier.includes('@')) {
+      sendOtpEmail(identifier, otp)
+        .then(res => {
+          if (!res.success) {
+            console.warn(`[AUTH-OTP] SMTP Mailer status: ${res.message}. If you have not set up EMAIL_USER/EMAIL_PASS in variables, look at this log or use fallback '123456'.`);
+          } else {
+            console.log(`[AUTH-OTP] Successfully sent real email to ${identifier}.`);
+          }
+        })
+        .catch(err => {
+          console.error('[AUTH-OTP] Error in background mailer:', err);
+        });
+    }
 
     return {
       success: true,
-      message: `OTP sent successfully to +91 ${cleaned}`,
+      message: `OTP sent successfully to ${identifier}`,
       demoOtp: otp,
     };
   },
 
   verifyPhoneOtp(
-    rawPhone: string,
+    emailOrPhone: string,
     otpInput: string,
     fullName?: string,
     district?: string
   ): { success: boolean; user?: UserProfile; error?: string } {
-    const cleaned = rawPhone.replace(/\D/g, '').slice(-10);
-    if (cleaned.length !== 10) {
-      return { success: false, error: 'Invalid 10-digit mobile number' };
+    const identifier = emailOrPhone.trim().toLowerCase();
+    if (!identifier) {
+      return { success: false, error: 'Invalid identifier' };
     }
 
-    const cached = OTP_DB.get(cleaned);
+    const cached = OTP_DB.get(identifier);
     const isMasterOtp = otpInput.trim() === '123456';
     const isMatch = cached && cached.otp === otpInput.trim() && Date.now() < cached.expiresAt;
 
@@ -1003,9 +1019,8 @@ export const db = {
       };
     }
 
-    const formattedPhone = `+91 ${cleaned}`;
     let existingUser = Array.from(USER_PROFILES_DB.values()).find(
-      u => u.phone === formattedPhone || u.email === `${cleaned}@tripurajobs.in`
+      u => u.email === identifier || u.phone === identifier
     );
 
     if (existingUser) {
@@ -1015,13 +1030,14 @@ export const db = {
       return { success: true, user: existingUser };
     }
 
+    const isEmail = identifier.includes('@');
     const newUser: UserProfile = {
-      id: `usr-mob-${Date.now()}`,
-      email: `${cleaned}@tripurajobs.in`,
-      phone: formattedPhone,
+      id: `usr-cand-${Date.now()}`,
+      email: isEmail ? identifier : `${identifier}@tripurajobs.in`,
+      phone: isEmail ? undefined : identifier,
       district: district || 'West Tripura (Agartala)',
       is_phone_verified: true,
-      full_name: (fullName && fullName.trim()) || `Candidate (${cleaned.slice(-4)})`,
+      full_name: (fullName && fullName.trim()) || `Candidate (${identifier.split('@')[0]})`,
       role: 'user',
       preferences: {
         notify_new_jobs: true,

@@ -6,8 +6,8 @@ interface AuthContextType {
   user: UserProfile | null;
   isAdmin: boolean;
   isAuthenticated: boolean;
-  sendPhoneOtp: (phone: string) => Promise<{ success: boolean; message: string; demoOtp: string }>;
-  verifyPhoneOtp: (phone: string, otp: string, fullName?: string, district?: string) => Promise<void>;
+  sendPhoneOtp: (emailOrPhone: string) => Promise<{ success: boolean; message: string; demoOtp: string }>;
+  verifyPhoneOtp: (emailOrPhone: string, otp: string, fullName?: string, district?: string) => Promise<void>;
   login: (email: string, pass: string) => Promise<void>;
   adminLogin: (loginId: string, pass: string) => Promise<void>;
   adminLogout: () => void;
@@ -43,44 +43,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [user]);
 
-  const sendPhoneOtp = async (phone: string) => {
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+  const sendPhoneOtp = async (emailOrPhone: string) => {
+    const cleanIdentifier = emailOrPhone.trim().toLowerCase();
     try {
-      const res = await api.sendOtp(cleanPhone);
+      const res = await api.sendOtp(cleanIdentifier);
       return res;
     } catch (err) {
       console.warn('API OTP send failed, using client-side fallback:', err);
       // Generate a 6-digit local OTP
       const localOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      setLocalOtpStore(prev => ({ ...prev, [cleanPhone]: localOtp }));
+      setLocalOtpStore(prev => ({ ...prev, [cleanIdentifier]: localOtp }));
       return {
         success: true,
-        message: `OTP generated locally (Secure Offline Fallback) for +91 ${cleanPhone}`,
+        message: `OTP generated locally for ${cleanIdentifier}`,
         demoOtp: localOtp,
       };
     }
   };
 
   const verifyPhoneOtp = async (
-    phone: string,
+    emailOrPhone: string,
     otp: string,
     fullName?: string,
     district?: string
   ) => {
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
+    const cleanIdentifier = emailOrPhone.trim().toLowerCase();
     try {
-      const res = await api.verifyOtp(cleanPhone, otp, fullName, district);
+      const res = await api.verifyOtp(cleanIdentifier, otp, fullName, district);
       setUser(res.user);
       localStorage.setItem('tripura_cand_token', res.token);
     } catch (err) {
       console.warn('API OTP verification failed, trying client-side fallback:', err);
-      const savedOtp = localOtpStore[cleanPhone];
+      const savedOtp = localOtpStore[cleanIdentifier];
       const isMasterOtp = otp.trim() === '123456';
       const isMatch = (savedOtp && savedOtp === otp.trim()) || isMasterOtp;
       if (isMatch) {
         const mockUser: UserProfile = {
-          id: `usr-${cleanPhone}`,
-          email: `${cleanPhone}@tripura-jobs.in`,
+          id: `usr-${Date.now()}`,
+          email: cleanIdentifier.includes('@') ? cleanIdentifier : `${cleanIdentifier}@tripura-jobs.in`,
           full_name: fullName?.trim() || 'Candidate',
           role: 'user',
           district: district || 'West Tripura (Agartala)',

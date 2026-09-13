@@ -13,6 +13,7 @@ import {
   MapPin,
   User,
   BellRing,
+  Mail,
 } from 'lucide-react';
 
 const TRIPURA_DISTRICTS = [
@@ -32,7 +33,7 @@ export const UserAuthScreen: React.FC = () => {
 
   // Candidate Registration & OTP State
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [district, setDistrict] = useState(TRIPURA_DISTRICTS[0]);
   const [otp, setOtp] = useState('');
@@ -56,16 +57,16 @@ export const UserAuthScreen: React.FC = () => {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
-    if (cleanPhone.length !== 10) {
-      setErrorMsg('Please enter a valid 10-digit Indian mobile number.');
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setErrorMsg('Please enter a valid email address.');
       return;
     }
 
     try {
       setLoading(true);
       setErrorMsg(null);
-      const res = await sendPhoneOtp(cleanPhone);
+      const res = await sendPhoneOtp(cleanEmail);
       setActiveOtpCode(res.demoOtp);
       setStep('otp');
       setTimer(180);
@@ -80,14 +81,14 @@ export const UserAuthScreen: React.FC = () => {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!otp.trim()) {
-      setErrorMsg('Please enter the 6-digit OTP sent to your phone.');
+      setErrorMsg('Please enter the 6-digit OTP sent to your email.');
       return;
     }
 
     try {
       setLoading(true);
       setErrorMsg(null);
-      await verifyPhoneOtp(phone, otp.trim(), fullName, district);
+      await verifyPhoneOtp(email, otp.trim(), fullName, district);
     } catch (err: any) {
       setErrorMsg(err.message || 'Invalid OTP code. Please check and re-enter.');
     } finally {
@@ -136,7 +137,7 @@ export const UserAuthScreen: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Candidate Login (Mobile + OTP)
+              Candidate Login (Email + OTP)
             </button>
             <button
               type="button"
@@ -162,7 +163,7 @@ export const UserAuthScreen: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
-            {/* Step 1: Mobile & Registration Info */}
+            {/* Step 1: Email & Registration Info */}
             {step === 'phone' && (
               <>
                 <div>
@@ -170,7 +171,7 @@ export const UserAuthScreen: React.FC = () => {
                     Registration & Quick Login
                   </h2>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Enter your mobile number to receive official Tripura job notifications via OTP.
+                    Enter your email address to receive official Tripura job notifications via OTP.
                   </p>
                 </div>
 
@@ -182,23 +183,22 @@ export const UserAuthScreen: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSendOtp} className="space-y-3.5">
-                  {/* Phone Input */}
+                  {/* Email Input */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="user-phone">
-                      Mobile Number <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="user-email">
+                      Email Address <span className="text-rose-500">*</span>
                     </label>
-                    <div className="relative flex">
-                      <span className="inline-flex items-center px-3.5 rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 text-slate-600 font-bold text-xs">
-                        🇮🇳 +91
-                      </span>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <Mail className="w-4 h-4" />
+                      </div>
                       <input
-                        id="user-phone"
-                        type="tel"
-                        maxLength={10}
-                        value={phone}
-                        onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
-                        placeholder="10-digit mobile number"
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-r-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                        id="user-email"
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="e.g. candidate@example.com"
+                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
                         required
                         disabled={loading}
                       />
@@ -257,10 +257,10 @@ export const UserAuthScreen: React.FC = () => {
                     disabled={loading}
                     className="w-full mt-2 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2 disabled:opacity-60"
                   >
-                    {loading ? (
+                     {loading ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Sending OTP via SMS...</span>
+                        <span>Sending OTP to email...</span>
                       </>
                     ) : (
                       <>
@@ -282,7 +282,7 @@ export const UserAuthScreen: React.FC = () => {
                       Enter Verification Code
                     </h2>
                     <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      Enter 6-digit OTP sent to <span className="font-bold text-slate-800 font-mono">+91 {phone}</span>
+                      Enter 6-digit OTP sent to <span className="font-bold text-slate-800 font-mono">{email}</span>
                     </p>
                   </div>
                   <button
