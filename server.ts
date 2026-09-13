@@ -5,11 +5,10 @@ import fs from 'fs';
 import { db } from './server/db.js';
 import { ScannerEngine } from './server/scanner/scannerEngine.js';
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const PORT = 3000;
 
-  app.use(express.json());
+app.use(express.json());
 
   // ==========================================
   // API ROUTES
@@ -324,12 +323,16 @@ async function startServer() {
   // VITE OR STATIC SERVING
   // ==========================================
   if (process.env.NODE_ENV !== 'production') {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
+    import('vite').then(({ createServer: createViteServer }) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      }).then(vite => {
+        app.use(vite.middlewares);
+      });
+    }).catch(err => {
+      console.error('Failed to load Vite server', err);
     });
-    app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
@@ -338,9 +341,10 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Tripura Govt Job Scanner running on port ${PORT}`);
-  });
-}
+  if (process.env.VERCEL !== '1') {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Tripura Govt Job Scanner running on port ${PORT}`);
+    });
+  }
 
-startServer();
+export default app;
