@@ -24,12 +24,25 @@ import {
 } from 'lucide-react';
 
 const TRIPURA_DEPARTMENTS = [
-  { name: 'TPSC (Public Service Commission)', code: 'TPSC', filterOrg: 'Tripura Public Service Commission' },
-  { name: 'JRBT (Joint Recruitment Board)', code: 'JRBT', filterOrg: 'Joint Recruitment Board Tripura' },
-  { name: 'Health & Family Welfare', code: 'HEALTH', filterOrg: 'Health & Family Welfare' },
-  { name: 'School Education Dept', code: 'EDU', filterOrg: 'Education (School) Department' },
-  { name: 'Tripura Police Recruitment', code: 'POLICE', filterOrg: 'Tripura Police Department' },
-  { name: 'High Court of Tripura', code: 'HC', filterOrg: 'High Court of Tripura' },
+  { name: 'TPSC (Public Service)', code: 'TPSC', filterOrg: 'TPSC' },
+  { name: 'TRBT (Teachers)', code: 'TRBT', filterOrg: 'TRBT' },
+  { name: 'JRBT (Joint Board)', code: 'JRBT', filterOrg: 'JRBT' },
+  { name: 'Health & NHM', code: 'HEALTH', filterOrg: 'Health' },
+  { name: 'School Education Dept', code: 'EDU', filterOrg: 'Education' },
+  { name: 'Tripura Police', code: 'POLICE', filterOrg: 'Police' },
+  { name: 'High Court of Tripura', code: 'HC', filterOrg: 'High Court' },
+  { name: 'Tripura Forest Dept', code: 'FOREST', filterOrg: 'Forest' },
+  { name: 'Rural Development (RD)', code: 'RD', filterOrg: 'Rural Development' },
+  { name: 'Info Technology (DIT)', code: 'DIT', filterOrg: 'Information Technology' },
+  { name: 'TSECL Power Dept', code: 'TSECL', filterOrg: 'Power' },
+  { name: 'TRLM Livelihood', code: 'TRLM', filterOrg: 'TRLM' },
+  { name: 'Social Welfare & ICDS', code: 'SWSE', filterOrg: 'Social Welfare' },
+  { name: 'Agriculture (Krishi)', code: 'KRISHI', filterOrg: 'Agriculture' },
+  { name: 'Tripura University', code: 'TU', filterOrg: 'Tripura University' },
+  { name: 'NIT Agartala', code: 'NITA', filterOrg: 'NIT' },
+  { name: 'MBB University', code: 'MBBU', filterOrg: 'MBB' },
+  { name: 'SSC Eastern Region', code: 'SSC', filterOrg: 'Staff Selection' },
+  { name: 'Tripura State Portal', code: 'PORTAL', filterOrg: 'Tripura State Portal' },
 ];
 
 export const SidebarDrawer: React.FC = () => {
@@ -146,14 +159,6 @@ export const SidebarDrawer: React.FC = () => {
       icon: Bell,
       badge: unreadNotificationsCount > 0 ? `${unreadNotificationsCount} New` : null,
       badgeColor: 'bg-rose-500 text-white animate-pulse',
-    },
-    {
-      id: 'admin',
-      label: 'Recruitment Admin Portal',
-      sublabel: 'Trigger scanner & feed manager',
-      icon: Shield,
-      badge: isAdmin ? 'Admin' : 'Protected',
-      badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',
     },
     {
       id: 'profile',

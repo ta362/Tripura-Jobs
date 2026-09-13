@@ -1,5 +1,6 @@
 import React from 'react';
 import { useJobs } from '../context/JobContext';
+import { formatReadableDate } from '../utils/dateFormatter';
 import {
   X,
   Calendar,
@@ -101,7 +102,7 @@ export const JobDetailsModal: React.FC = () => {
             <div className="text-right">
               <span className="text-[11px] text-slate-500 block font-semibold">Published Date</span>
               <span className="text-xs font-bold text-emerald-800">
-                {selectedJob.notification_date}
+                {formatReadableDate(selectedJob.notification_date)}
               </span>
             </div>
           </div>
@@ -137,19 +138,19 @@ export const JobDetailsModal: React.FC = () => {
               <div className="bg-white p-3 rounded-xl border border-slate-200">
                 <span className="text-slate-500 block text-[11px] font-medium">Application Starts</span>
                 <span className="font-bold text-slate-900 mt-0.5 block">
-                  {selectedJob.application_start_date}
+                  {formatReadableDate(selectedJob.application_start_date)}
                 </span>
               </div>
               <div className="bg-white p-3 rounded-xl border border-rose-200 bg-rose-50/40">
                 <span className="text-rose-700 block text-[11px] font-semibold">Application Last Date</span>
                 <span className="font-bold text-rose-800 mt-0.5 block">
-                  {selectedJob.application_last_date}
+                  {formatReadableDate(selectedJob.application_last_date)}
                 </span>
               </div>
               <div className="bg-white p-3 rounded-xl border border-slate-200">
                 <span className="text-slate-500 block text-[11px] font-medium">Examination Date</span>
                 <span className="font-bold text-slate-800 mt-0.5 block">
-                  {selectedJob.exam_date || 'To be announced officially'}
+                  {selectedJob.exam_date ? formatReadableDate(selectedJob.exam_date) : 'To be announced officially'}
                 </span>
               </div>
             </div>

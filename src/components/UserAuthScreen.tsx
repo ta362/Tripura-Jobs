@@ -1,19 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { AdminLoginForm } from './AdminLoginForm';
 import {
-  Smartphone,
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
   Shield,
-  RotateCcw,
-  Check,
   MapPin,
   User,
-  BellRing,
   Mail,
+  Lock,
+  Key,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 const TRIPURA_DISTRICTS = [
@@ -28,87 +27,86 @@ const TRIPURA_DISTRICTS = [
 ];
 
 export const UserAuthScreen: React.FC = () => {
-  const { sendPhoneOtp, verifyPhoneOtp } = useAuth();
-  const [authMode, setAuthMode] = useState<'candidate' | 'admin'>('candidate');
-
-  // Candidate Registration & OTP State
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
+  const { candidateRegister, candidateLogin } = useAuth();
+  
+  // UI views: 'login' | 'register' | 'success'
+  const [mode, setMode] = useState<'login' | 'register' | 'success'>('register');
+  
+  // Inputs
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [district, setDistrict] = useState(TRIPURA_DISTRICTS[0]);
-  const [otp, setOtp] = useState('');
+  const [phone, setPhone] = useState('');
+  
+  // Login credentials
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // Registration Result
+  const [generatedId, setGeneratedId] = useState('');
+  const [generatedPass, setGeneratedPass] = useState('');
+  const [copied, setCopied] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [activeOtpCode, setActiveOtpCode] = useState<string>('');
-  const [timer, setTimer] = useState(180);
-  const [canResend, setCanResend] = useState(false);
-  const [isSmtpConfigured, setIsSmtpConfigured] = useState<boolean>(true);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (step === 'otp' && timer > 0) {
-      interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
-    } else if (timer === 0) {
-      setCanResend(true);
-    }
-    return () => clearInterval(interval);
-  }, [step, timer]);
-
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !cleanEmail.includes('@')) {
       setErrorMsg('Please enter a valid email address.');
       return;
     }
-
-    try {
-      setLoading(true);
-      setErrorMsg(null);
-      const res = await sendPhoneOtp(cleanEmail);
-      setActiveOtpCode(res.demoOtp);
-      if (res.isSmtpConfigured !== undefined) {
-        setIsSmtpConfigured(res.isSmtpConfigured);
-      }
-      setStep('otp');
-      setTimer(180);
-      setCanResend(false);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to send OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp.trim()) {
-      setErrorMsg('Please enter the 6-digit OTP sent to your email.');
+    if (!fullName.trim()) {
+      setErrorMsg('Please enter your full name.');
       return;
     }
 
     try {
       setLoading(true);
       setErrorMsg(null);
-      await verifyPhoneOtp(email, otp.trim(), fullName, district);
+      const user = await candidateRegister(fullName, cleanEmail, district, phone);
+      if (user.login_id && user.password) {
+        setGeneratedId(user.login_id);
+        setGeneratedPass(user.password);
+        setMode('success');
+      } else {
+        setErrorMsg('Successfully registered, but no ID/Password was returned.');
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Invalid OTP code. Please check and re-enter.');
+      setErrorMsg(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginId.trim() || !password.trim()) {
+      setErrorMsg('Please enter your User ID and Password.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      await candidateLogin(loginId, password);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Incorrect User ID or Password. Please check and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopyCredentials = () => {
+    const textToCopy = `User ID: ${generatedId}\nPassword: ${generatedPass}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center items-center p-4 selection:bg-emerald-500 selection:text-white">
-      {/* Background decoration */}
       <div className="w-full max-w-md my-auto">
         {/* Top Emblem & Header */}
         <div className="text-center mb-6 space-y-2">
@@ -123,260 +121,279 @@ export const UserAuthScreen: React.FC = () => {
               Tripura Job Scanner
             </h1>
             <p className="text-xs text-slate-600 font-medium max-w-xs mx-auto mt-1">
-              Official automated recruitment scanner and direct vacancy alert portal
+              Official candidate registration and direct vacancy notification alerts
             </p>
           </div>
 
-          {/* Mode Switch: Candidate vs Admin */}
-          <div className="inline-flex p-1 bg-white border border-slate-200 rounded-2xl shadow-xs text-xs font-bold mt-2">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('candidate');
-                setErrorMsg(null);
-              }}
-              className={`px-4 py-1.5 rounded-xl transition-all ${
-                authMode === 'candidate'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Candidate Login (Email + OTP)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode('admin');
-                setErrorMsg(null);
-              }}
-              className={`px-4 py-1.5 rounded-xl transition-all ${
-                authMode === 'admin'
-                  ? 'bg-purple-700 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Admin Portal
-            </button>
-          </div>
+          {/* Registration vs Login mode switch (Hides Admin completely!) */}
+          {mode !== 'success' && (
+            <div className="inline-flex p-1 bg-white border border-slate-200 rounded-2xl shadow-xs text-xs font-bold mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('register');
+                  setErrorMsg(null);
+                }}
+                className={`px-4 py-1.5 rounded-xl transition-all ${
+                  mode === 'register'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                New Registration
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setErrorMsg(null);
+                }}
+                className={`px-4 py-1.5 rounded-xl transition-all ${
+                  mode === 'login'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Sign In
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Card Body */}
-        {authMode === 'admin' ? (
-          <div className="space-y-4">
-            <AdminLoginForm />
-          </div>
-        ) : (
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
-            {/* Step 1: Email & Registration Info */}
-            {step === 'phone' && (
-              <>
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+          {errorMsg && (
+            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-start space-x-2.5 text-xs font-semibold">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1">{errorMsg}</div>
+            </div>
+          )}
+
+          {/* MODE: REGISTER */}
+          {mode === 'register' && (
+            <>
+              <div>
+                <h2 className="text-lg font-black text-slate-900">
+                  Candidate Registration
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Create your profile to get a personalized Tripura Jobs scanning account.
+                </p>
+              </div>
+
+              <form onSubmit={handleRegister} className="space-y-3.5">
+                {/* Full Name */}
                 <div>
-                  <h2 className="text-lg font-black text-slate-900">
-                    Registration & Quick Login
-                  </h2>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Enter your email address to receive official Tripura job notifications via OTP.
-                  </p>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="reg-fullname">
+                    Candidate Full Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="reg-fullname"
+                    type="text"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                    required
+                    disabled={loading}
+                  />
                 </div>
 
-                {errorMsg && (
-                  <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-start space-x-2.5 text-xs font-semibold">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div className="flex-1">{errorMsg}</div>
-                  </div>
-                )}
-
-                <form onSubmit={handleSendOtp} className="space-y-3.5">
-                  {/* Email Input */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="user-email">
-                      Email Address <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <Mail className="w-4 h-4" />
-                      </div>
-                      <input
-                        id="user-email"
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="e.g. candidate@example.com"
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Candidate Name Input */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="user-fullname">
-                      Candidate Full Name
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <User className="w-4 h-4" />
-                      </div>
-                      <input
-                        id="user-fullname"
-                        type="text"
-                        value={fullName}
-                        onChange={e => setFullName(e.target.value)}
-                        placeholder="e.g. Rajib Debbarma"
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                        disabled={loading}
-                      />
-                    </div>
-                  </div>
-
-                  {/* District in Tripura */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="user-district">
-                      Home District (Tripura)
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <MapPin className="w-4 h-4" />
-                      </div>
-                      <select
-                        id="user-district"
-                        value={district}
-                        onChange={e => setDistrict(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                        disabled={loading}
-                      >
-                        {TRIPURA_DISTRICTS.map(d => (
-                          <option key={d} value={d}>
-                            {d}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Send OTP Button */}
-                  <button
-                    type="submit"
+                {/* Email */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="reg-email">
+                    Email Address <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="reg-email"
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                    required
                     disabled={loading}
-                    className="w-full mt-2 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2 disabled:opacity-60"
-                  >
-                     {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Sending OTP to email...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Get Verification OTP</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              </>
-            )}
+                  />
+                </div>
 
-            {/* Step 2: OTP Verification Screen */}
-            {step === 'otp' && (
-              <>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-black text-slate-900">
-                      Enter Verification Code
-                    </h2>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">
-                      Enter 6-digit OTP sent to <span className="font-bold text-slate-800 font-mono">{email}</span>
-                    </p>
-                  </div>
+                {/* District */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="reg-district">
+                    Home District (Tripura) <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    id="reg-district"
+                    value={district}
+                    onChange={e => setDistrict(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
+                    disabled={loading}
+                  >
+                    {TRIPURA_DISTRICTS.map(d => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Submit Register Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2 disabled:opacity-60"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Creating Profile...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Generate User ID & Password</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* MODE: LOGIN */}
+          {mode === 'login' && (
+            <>
+              <div>
+                <h2 className="text-lg font-black text-slate-900">
+                  Candidate Sign In
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Enter your generated credentials to access your Tripura Jobs profile.
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                {/* User ID */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="login-id">
+                    User ID or Email
+                  </label>
+                  <input
+                    id="login-id"
+                    type="text"
+                    value={loginId}
+                    onChange={e => setLoginId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all font-mono"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="login-pass">
+                    Password
+                  </label>
+                  <input
+                    id="login-pass"
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all font-mono"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Submit Login Button */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2 disabled:opacity-60"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Signing In...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Sign In & Enter Dashboard</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+
+          {/* MODE: REGISTRATION SUCCESS - SHOW CREDENTIALS */}
+          {mode === 'success' && (
+            <div className="space-y-5 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              
+              <div>
+                <h2 className="text-lg font-black text-slate-900">
+                  Profile Created Successfully!
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  Please copy or write down your official credentials. You will need them to log in next time.
+                </p>
+              </div>
+
+              {/* Credentials Box */}
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3.5 text-left relative overflow-hidden">
+                <div className="absolute top-3 right-3">
                   <button
                     type="button"
-                    onClick={() => {
-                      setStep('phone');
-                      setErrorMsg(null);
-                    }}
-                    className="text-xs font-bold text-emerald-700 hover:underline"
+                    onClick={handleCopyCredentials}
+                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 shadow-xs transition-all active:scale-95"
+                    title="Copy to Clipboard"
                   >
-                    Change
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
 
-                {errorMsg && (
-                  <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-start space-x-2.5 text-xs font-semibold">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div className="flex-1">{errorMsg}</div>
-                  </div>
-                )}
+                <div>
+                  <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Your User ID</span>
+                  <div className="text-lg font-black font-mono text-slate-900 tracking-wide mt-0.5">{generatedId}</div>
+                </div>
 
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5" htmlFor="otp-input">
-                      6-Digit OTP Code
-                    </label>
-                    <input
-                      id="otp-input"
-                      type="text"
-                      maxLength={6}
-                      value={otp}
-                      onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="e.g. 123456"
-                      className="w-full text-center tracking-[0.4em] py-3 bg-slate-50 border border-slate-300 rounded-xl text-lg font-mono font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all"
-                      required
-                      autoFocus
-                      disabled={loading}
-                    />
-                  </div>
+                <div>
+                  <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">Password</span>
+                  <div className="text-lg font-black font-mono text-emerald-800 tracking-wide mt-0.5">{generatedPass}</div>
+                </div>
+              </div>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-500 font-medium">
-                      {timer > 0 ? (
-                        <span>Resend OTP in <strong className="text-slate-700 font-mono">{formatTime(timer)}</strong></span>
-                      ) : (
-                        <span>Didn't receive code?</span>
-                      )}
-                    </span>
-                    {canResend && (
-                      <button
-                        type="button"
-                        onClick={handleSendOtp}
-                        className="text-emerald-700 hover:text-emerald-800 font-bold inline-flex items-center space-x-1"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        <span>Resend OTP</span>
-                      </button>
-                    )}
-                  </div>
+              {copied && (
+                <div className="text-xs font-bold text-emerald-700 animate-pulse">
+                  Credentials copied to clipboard!
+                </div>
+              )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2 disabled:opacity-60"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Verifying OTP...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Verify & Enter Job Portal</span>
-                      </>
-                    )}
-                  </button>
-                </form>
-              </>
-            )}
-
-            {/* Privacy & Guarantee note */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-center space-x-1.5 text-center">
-              <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <p className="text-[10px] text-slate-500 font-medium">
-                Verified Candidate Access &bull; 100% Free Official Service
-              </p>
+              {/* Proceed to manual sign-in button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setLoginId(generatedId);
+                  setPassword(generatedPass);
+                  setMode('login');
+                  setErrorMsg(null);
+                }}
+                className="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-700/20 transition-all active:scale-98 flex items-center justify-center space-x-2"
+              >
+                <span>Proceed to Sign In</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
+          )}
+
+          {/* Privacy & Guarantee note */}
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-center space-x-1.5 text-center">
+            <Shield className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <p className="text-[10px] text-slate-500 font-medium">
+              Verified Candidate Access &bull; 100% Free Official Service
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -177,38 +177,6 @@ export const ProfileView: React.FC = () => {
             )}
           </div>
         )}
-
-        {/* Role Demonstration Toggle */}
-        <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-2">
-            <Shield className="w-4 h-4 text-purple-600" />
-            <span className="text-slate-700 font-bold">Role Mode:</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <button
-              onClick={() => switchRole('user')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                !isAdmin
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              Candidate
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('admin');
-              }}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                isAdmin
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              {isAdmin ? 'Admin Console' : 'Admin Login'}
-            </button>
-          </div>
-        </div>
       </div>
 
       {/* Notification Preferences */}

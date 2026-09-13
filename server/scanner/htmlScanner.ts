@@ -1,5 +1,5 @@
-import { JobSource } from './types';
-import { OFFICIAL_PORTAL_REGISTRY } from './officialRegistry';
+import { JobSource } from './types.js';
+import { OFFICIAL_PORTAL_REGISTRY } from './officialRegistry.js';
 
 export interface FetchedNotificationItem {
   title: string;

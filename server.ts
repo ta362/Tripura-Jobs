@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { db } from './server/db';
-import { ScannerEngine } from './server/scanner/scannerEngine';
+import { db } from './server/db.js';
+import { ScannerEngine } from './server/scanner/scannerEngine.js';
 
 const app = express();
 const PORT = 3000;
@@ -228,37 +228,36 @@ app.use(express.json());
     res.json({ success: true, message: 'Admin credentials updated successfully' });
   });
 
-  // Email & OTP Candidate Registration / Login
-  app.post('/api/auth/send-otp', (req, res) => {
-    const { email, phone } = req.body;
-    const target = email || phone;
-    if (!target) {
-      return res.status(400).json({ success: false, error: 'Email address is required' });
+  // Candidate ID & Password Registration / Login
+  app.post('/api/auth/candidate-register', (req, res) => {
+    const { fullName, email, district, phone } = req.body;
+    if (!email || !fullName) {
+      return res.status(400).json({ success: false, error: 'Full name and email address are required' });
     }
 
     try {
-      const result = db.sendPhoneOtp(target);
+      const result = db.candidateRegister(fullName, email, district, phone);
       res.json({
         success: true,
-        message: result.message,
-        demoOtp: result.demoOtp, // Delivered to client simulator for seamless experience
-        isSmtpConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
+        data: {
+          user: result.user,
+          token: `cand-token-${Date.now()}-${result.user.id}`,
+        },
       });
     } catch (err: any) {
-      res.status(400).json({ success: false, error: err.message || 'Failed to send OTP' });
+      res.status(400).json({ success: false, error: err.message || 'Failed to register' });
     }
   });
 
-  app.post('/api/auth/verify-otp', (req, res) => {
-    const { email, phone, otp, fullName, district } = req.body;
-    const target = email || phone;
-    if (!target || !otp) {
-      return res.status(400).json({ success: false, error: 'Email address and 6-digit OTP are required' });
+  app.post('/api/auth/candidate-login', (req, res) => {
+    const { loginId, password } = req.body;
+    if (!loginId || !password) {
+      return res.status(400).json({ success: false, error: 'User ID and Password are required' });
     }
 
-    const verification = db.verifyPhoneOtp(target, otp, fullName, district);
+    const verification = db.candidateLogin(loginId, password);
     if (!verification.success || !verification.user) {
-      return res.status(400).json({ success: false, error: verification.error || 'Invalid OTP' });
+      return res.status(400).json({ success: false, error: verification.error || 'Invalid login credentials' });
     }
 
     res.json({

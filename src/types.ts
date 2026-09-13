@@ -93,6 +93,8 @@ export interface UserProfile {
   is_phone_verified?: boolean;
   full_name: string;
   role: 'user' | 'admin';
+  login_id?: string;
+  password?: string;
   preferences: {
     notify_new_jobs: boolean;
     notify_closing_soon: boolean;

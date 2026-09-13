@@ -18,12 +18,25 @@ interface AndroidFrameProps {
 }
 
 const TRIPURA_DEPARTMENTS = [
-  { name: 'TPSC', filterOrg: 'Tripura Public Service Commission' },
-  { name: 'JRBT', filterOrg: 'Joint Recruitment Board Tripura' },
-  { name: 'Health & Family Welfare', filterOrg: 'Health & Family Welfare' },
-  { name: 'Education Dept', filterOrg: 'Education (School) Department' },
-  { name: 'Tripura Police', filterOrg: 'Tripura Police Department' },
-  { name: 'High Court', filterOrg: 'High Court of Tripura' },
+  { name: 'TPSC (Public Service)', filterOrg: 'TPSC' },
+  { name: 'TRBT (Teachers)', filterOrg: 'TRBT' },
+  { name: 'JRBT (Joint Board)', filterOrg: 'JRBT' },
+  { name: 'Health & NHM', filterOrg: 'Health' },
+  { name: 'School Education Dept', filterOrg: 'Education' },
+  { name: 'Tripura Police', filterOrg: 'Police' },
+  { name: 'High Court', filterOrg: 'High Court' },
+  { name: 'Tripura Forest', filterOrg: 'Forest' },
+  { name: 'Rural Development (RD)', filterOrg: 'Rural Development' },
+  { name: 'Info Technology (DIT)', filterOrg: 'Information Technology' },
+  { name: 'TSECL Power Dept', filterOrg: 'Power' },
+  { name: 'TRLM Livelihood', filterOrg: 'TRLM' },
+  { name: 'Social Welfare & ICDS', filterOrg: 'Social Welfare' },
+  { name: 'Agriculture (Krishi)', filterOrg: 'Agriculture' },
+  { name: 'Tripura Univ', filterOrg: 'Tripura University' },
+  { name: 'NIT Agartala', filterOrg: 'NIT' },
+  { name: 'MBB University', filterOrg: 'MBB' },
+  { name: 'SSC ER', filterOrg: 'Staff Selection' },
+  { name: 'Tripura State Portal', filterOrg: 'Tripura State Portal' },
 ];
 
 export const AndroidFrame: React.FC<AndroidFrameProps> = ({ children }) => {
@@ -45,12 +58,6 @@ export const AndroidFrame: React.FC<AndroidFrameProps> = ({ children }) => {
       label: 'Alerts',
       icon: Bell,
       badge: unreadNotificationsCount > 0 ? unreadNotificationsCount : null,
-    },
-    {
-      id: 'admin',
-      label: 'Admin',
-      icon: Shield,
-      badge: isAdmin ? null : null,
     },
     {
       id: 'profile',

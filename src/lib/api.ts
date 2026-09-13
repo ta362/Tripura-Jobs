@@ -150,49 +150,37 @@ export const api = {
     return json.success;
   },
 
-  // Auth: Email OTP
-  async sendOtp(email: string): Promise<{ success: boolean; message: string; demoOtp: string; isSmtpConfigured?: boolean }> {
-    const res = await fetch('/api/auth/send-otp', {
+  // Auth: Candidate registration and login
+  async candidateRegister(
+    fullName: string,
+    email: string,
+    district: string,
+    phone?: string
+  ): Promise<{ user: UserProfile; token: string }> {
+    const res = await fetch('/api/auth/candidate-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ fullName, email, district, phone }),
     });
     if (!res.ok) {
-      throw new Error(`Server connection issue (${res.status}). Please restart or refresh.`);
-    }
-    const contentType = res.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Unexpected response from server. Please try again.');
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || 'Failed to register candidate');
     }
     const json = await res.json();
-    if (!json.success) {
-      throw new Error(json.error || 'Failed to send OTP');
-    }
-    return json;
+    return json.data;
   },
 
-  async verifyOtp(
-    email: string,
-    otp: string,
-    fullName?: string,
-    district?: string
-  ): Promise<{ user: UserProfile; token: string }> {
-    const res = await fetch('/api/auth/verify-otp', {
+  async candidateLogin(loginId: string, pass: string): Promise<{ user: UserProfile; token: string }> {
+    const res = await fetch('/api/auth/candidate-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp, fullName, district }),
+      body: JSON.stringify({ loginId, password: pass }),
     });
     if (!res.ok) {
-      throw new Error(`Verification request failed (${res.status}).`);
-    }
-    const contentType = res.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Unexpected response during verification. Please try again.');
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || 'Failed to login candidate');
     }
     const json = await res.json();
-    if (!json.success) {
-      throw new Error(json.error || 'Invalid OTP');
-    }
     return json.data;
   },
 

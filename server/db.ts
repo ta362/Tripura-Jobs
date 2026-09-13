@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { sendOtpEmail } from './mailer';
+import { sendOtpEmail } from './mailer.js';
 import {
   JobRecord,
   JobSource,
@@ -9,9 +9,9 @@ import {
   UserProfile,
   SavedJob,
   UserNotification,
-} from './scanner/types';
-import { INITIAL_JOB_SOURCES } from './scanner/sources';
-import { DuplicateDetector } from './scanner/duplicateDetector';
+} from './scanner/types.js';
+import { INITIAL_JOB_SOURCES } from './scanner/sources.js';
+import { DuplicateDetector } from './scanner/duplicateDetector.js';
 
 // Supabase client instance (configured with project URL https://fnanpfwiyxzgpjutqndb.supabase.co)
 export const DEFAULT_SUPABASE_PROJECT_URL = 'https://fnanpfwiyxzgpjutqndb.supabase.co';
@@ -474,6 +474,264 @@ const INITIAL_JOBS_RAW: Omit<JobRecord, 'content_hash'>[] = [
     last_seen_at: new Date().toISOString(),
     last_updated_at: new Date(Date.now() - 86400000 * 90).toISOString(),
     created_at: new Date(Date.now() - 86400000 * 90).toISOString(),
+  },
+  {
+    id: 'job-rd-grs-11',
+    source_id: 'src-rd-13',
+    organization_name: 'Rural Development Department (RD) Tripura',
+    department_name: 'Panchayat & Rural Development Cell',
+    job_title: 'Gram Rozgar Sahayak (GRS) / Rural Employment Coordinator',
+    advertisement_number: 'Advt. No. GRS-RD/2026/02',
+    notification_number: 'F.3(12)-RD/GRS/RECRUIT/2026',
+    notification_date: '2026-09-10',
+    application_start_date: '2026-09-15',
+    application_last_date: '2026-10-25',
+    exam_date: '2026-12-12',
+    vacancy_count: 150,
+    qualification: 'Higher Secondary (10+2) passed with at least 50% marks, plus minimum 6 months certificate in Computer Applications.',
+    age_min: 18,
+    age_max: 40,
+    age_relaxation: '5 years for SC/ST, 3 years for OBC candidates of Tripura',
+    salary: 'Consolidated pay of ₹18,500/month',
+    pay_level: 'Consolidated Contractual',
+    job_location: 'Various Block offices and Gram Panchayats in Tripura',
+    employment_type: 'Contractual (Renewable)',
+    selection_process: 'Written test of 100 Marks (General Knowledge, English, Math, and Basic Computers) followed by document verification.',
+    application_fee: '₹150 for UR, ₹100 for SC/ST/PH of Tripura',
+    category_information: 'UR: 76, ST: 47, SC: 27 (including 33% horizontal reservation for women)',
+    experience_required: 'None',
+    important_dates: 'Online applications open on September 15, 2026. Last date: October 25, 2026.',
+    official_notification_url: 'https://rural.tripura.gov.in/notifications/grs_recruitment_2026.pdf',
+    official_apply_url: 'https://rural.tripura.gov.in/online-application-grs',
+    source_url: 'https://rural.tripura.gov.in',
+    notification_pdf_url: 'https://rural.tripura.gov.in/notifications/grs_recruitment_2026.pdf',
+    extracted_text: 'Rural Development Department, Government of Tripura invites online applications from eligible local residents for 150 positions of Gram Rozgar Sahayak.',
+    summary: 'Recruitment for 150 Gram Rozgar Sahayak (GRS) contractual positions across all districts of Tripura.',
+    eligibility_summary: '10+2 passed with 50% marks + basic computer certification. Age 18 to 40.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'job-dit-it-12',
+    source_id: 'src-dit-14',
+    organization_name: 'Directorate of Information Technology (DIT) Tripura',
+    department_name: 'IT Operations & e-Governance Cell',
+    job_title: 'Information Technology Officer / System Analyst',
+    advertisement_number: 'Advt. No. DIT-IT-04/2026',
+    notification_number: 'F.5(8)-DIT/ESTT/2026',
+    notification_date: '2026-09-08',
+    application_start_date: '2026-09-12',
+    application_last_date: '2026-10-18',
+    exam_date: '2026-11-29',
+    vacancy_count: 12,
+    qualification: 'B.E. / B.Tech in Computer Science / Information Technology OR Master of Computer Applications (MCA) with 60% marks.',
+    age_min: 21,
+    age_max: 40,
+    age_relaxation: 'Standard state government rules apply',
+    salary: '₹42,900 - ₹1,35,500 (Pay Level 11 of Tripura State Pay Matrix)',
+    pay_level: 'Pay Level 11',
+    job_location: 'IT Bhavan, Agartala, West Tripura',
+    employment_type: 'Full Time / Permanent',
+    selection_process: 'Competitive Written exam (Technical Paper + Aptitude) followed by a technical interview.',
+    application_fee: '₹300 for General, ₹200 for Reserved',
+    category_information: 'UR: 6, ST: 4, SC: 2',
+    experience_required: 'Minimum 1 year in software development or network administration',
+    important_dates: 'Apply online between 12 Sep 2026 and 18 Oct 2026.',
+    official_notification_url: 'https://it.tripura.gov.in/recruitment/it_officer_2026.pdf',
+    official_apply_url: 'https://it.tripura.gov.in/jobs',
+    source_url: 'https://it.tripura.gov.in',
+    notification_pdf_url: 'https://it.tripura.gov.in/recruitment/it_officer_2026.pdf',
+    extracted_text: 'Directorate of Information Technology, Government of Tripura invites online applications for regular recruitment of 12 IT Officers and System Analysts.',
+    summary: 'Technical recruitment for 12 IT Officers to manage state e-Governance infrastructures and portals.',
+    eligibility_summary: 'B.Tech CS/IT or MCA. Age 21 to 40.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'job-tsecl-operator-13',
+    source_id: 'src-tsecl-15',
+    organization_name: 'Tripura State Electricity Corporation Ltd (TSECL)',
+    department_name: 'Transmission & Distribution Engineering Division',
+    job_title: 'Junior Operator / Sub-Station Assistant (Technical)',
+    advertisement_number: 'Advt. No. TSECL/2026/03',
+    notification_number: 'F.TSECL/ESTT/RECR/2026/12',
+    notification_date: '2026-09-12',
+    application_start_date: '2026-09-15',
+    application_last_date: '2026-10-30',
+    exam_date: '2026-12-20',
+    vacancy_count: 320,
+    qualification: 'Madhyamik (10th) passed or equivalent, with ITI Certificate in Electrical / Wireman trade from a government recognized institute.',
+    age_min: 18,
+    age_max: 40,
+    age_relaxation: '5 years for SC/ST and active state homeguards',
+    salary: '₹19,700 - ₹62,400 (Pay Level 5 of TSECL Wage Matrix)',
+    pay_level: 'Pay Level 5',
+    job_location: 'All sub-stations and electrical divisions in Tripura',
+    employment_type: 'Regular State PSU Service',
+    selection_process: '1. Skill / Trade Practical Test (Qualifying) 2. Computer Based Written Test (100 Marks)',
+    application_fee: '₹250 for General, ₹150 for SC/ST candidates',
+    category_information: 'UR: 164, ST: 100, SC: 56',
+    experience_required: 'None (Fresh ITI passouts are highly encouraged to apply)',
+    important_dates: 'Applications open on Sep 15, 2026 and close on Oct 30, 2026.',
+    official_notification_url: 'https://www.tsecl.in/careers/jr_operator_advt_2026.pdf',
+    official_apply_url: 'https://www.tsecl.in/recruitment',
+    source_url: 'https://www.tsecl.in',
+    notification_pdf_url: 'https://www.tsecl.in/careers/jr_operator_advt_2026.pdf',
+    extracted_text: 'Tripura State Electricity Corporation Limited invites online applications for regular filling of 320 Junior Operator vacancies.',
+    summary: 'Mass recruitment of 320 Junior Technical Operators and Substation Assistants under TSECL.',
+    eligibility_summary: '10th Class pass + ITI in Electrical/Wireman trade.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'job-trlm-bmc-14',
+    source_id: 'src-trlm-16',
+    organization_name: 'Tripura Rural Livelihood Mission (TRLM)',
+    department_name: 'State Mission Management Unit (SMMU)',
+    job_title: 'Block Mission Coordinator (Rural Livelihoods)',
+    advertisement_number: 'Advt. No. TRLM/ESTT-BMC/2026/01',
+    notification_number: 'F.12(5)-TRLM/RECR/2026',
+    notification_date: '2026-09-05',
+    application_start_date: '2026-09-10',
+    application_last_date: '2026-10-15',
+    exam_date: '2026-11-22',
+    vacancy_count: 45,
+    qualification: 'Post Graduate Degree / Diploma in Rural Development, Social Work, Agriculture, or allied streams from a UGC recognized university.',
+    age_min: 21,
+    age_max: 40,
+    age_relaxation: 'Relaxable by 5 years for SC/ST and ex-servicemen',
+    salary: 'Consolidated starting pay of ₹28,500/month',
+    pay_level: 'Contractual Package',
+    job_location: 'Any RD Block in Tripura',
+    employment_type: 'Contractual (Annual extension based on performance evaluation)',
+    selection_process: '1. Group Discussion 2. Written Examination (GK, Social Sectors, Rural Economy) 3. Personal Interview',
+    application_fee: 'No application fee (Free for all)',
+    category_information: 'UR: 23, ST: 14, SC: 8',
+    experience_required: 'Minimum 1 year in community mobilization, SHG management, or NGO sectors',
+    important_dates: 'Online submission portal open until 15 October 2026.',
+    official_notification_url: 'https://trlm.tripura.gov.in/recruitment/bmc_posts_2026.pdf',
+    official_apply_url: 'https://trlm.tripura.gov.in/apply',
+    source_url: 'https://trlm.tripura.gov.in',
+    notification_pdf_url: 'https://trlm.tripura.gov.in/recruitment/bmc_posts_2026.pdf',
+    extracted_text: 'Tripura Rural Livelihood Mission invites online applications from dynamic candidates for the posts of 45 Block Mission Coordinators.',
+    summary: 'Social development recruitment for 45 Block Mission Coordinators to lead SHG and microenterprise networks in rural blocks.',
+    eligibility_summary: 'Post Graduate in Rural Development/Social Work + 1 yr experience.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'job-swse-icds-15',
+    source_id: 'src-swse-17',
+    organization_name: 'Social Welfare & Social Education (SWSE) Tripura',
+    department_name: 'Integrated Child Development Services (ICDS)',
+    job_title: 'Supervisor (ICDS) / Child Welfare Officer',
+    advertisement_number: 'Advt. No. SWSE-ICDS-02/2026',
+    notification_number: 'F.14(22)-SW/ICDS/RECR/2026',
+    notification_date: '2026-09-11',
+    application_start_date: '2026-09-15',
+    application_last_date: '2026-10-22',
+    exam_date: '2026-12-13',
+    vacancy_count: 85,
+    qualification: 'Graduate of a recognized University with Child Development, Nutrition, Sociology, or Psychology as a subject. Female candidates only as per state policy.',
+    age_min: 18,
+    age_max: 40,
+    age_relaxation: 'Standard state relaxation guidelines',
+    salary: '₹27,300 - ₹86,300 (Pay Level 9 of State Civil Services Matrix)',
+    pay_level: 'Pay Level 9',
+    job_location: 'Any CDPO office or ICDS Project area in Tripura',
+    employment_type: 'Permanent regular state service',
+    selection_process: 'Written test (General Knowledge, Nutrition, Child Psychology) followed by an oral interview.',
+    application_fee: '₹200 for General, ₹150 for SC/ST',
+    category_information: 'UR: 43, ST: 27, SC: 15 (exclusively reserved for female applicants)',
+    experience_required: 'None',
+    important_dates: 'Online submission opens on 15 September and closes on 22 October 2026.',
+    official_notification_url: 'https://socialwelfare.tripura.gov.in/notifications/icds_supervisor_2026.pdf',
+    official_apply_url: 'https://socialwelfare.tripura.gov.in/careers',
+    source_url: 'https://socialwelfare.tripura.gov.in',
+    notification_pdf_url: 'https://socialwelfare.tripura.gov.in/notifications/icds_supervisor_2026.pdf',
+    extracted_text: 'Social Welfare and Social Education Department, Government of Tripura invites online applications for regular appointment of 85 ICDS Supervisors.',
+    summary: 'ICDS Administration recruitment for 85 Child Welfare and Nutrition Supervisors across state subdivisions.',
+    eligibility_summary: 'Female Graduate in Sociology/Psychology/Nutrition. Age 18 to 40.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'job-krishi-asst-16',
+    source_id: 'src-krishi-18',
+    organization_name: 'Agriculture & Farmers Welfare Department (Krishi)',
+    department_name: 'Extension & Farming Services Division',
+    job_title: 'Agriculture Assistant (Grade-II) / Krishi Sahayak',
+    advertisement_number: 'Advt. No. AGRI/ESTT-AA/2026/04',
+    notification_number: 'F.2(10)-AGRI/RECR/2026',
+    notification_date: '2026-09-09',
+    application_start_date: '2026-09-14',
+    application_last_date: '2026-10-20',
+    exam_date: '2026-11-29',
+    vacancy_count: 110,
+    qualification: 'Higher Secondary (10+2) passed in Science stream with Biology or Agriculture as one of the subjects from a recognized board.',
+    age_min: 18,
+    age_max: 40,
+    age_relaxation: 'Standard 5 years for SC/ST applicants',
+    salary: '₹22,800 - ₹72,300 (Pay Level 7 of State Civil Services)',
+    pay_level: 'Pay Level 7',
+    job_location: 'Sub-divisional Agriculture offices or Farmers advisory centers across Tripura',
+    employment_type: 'Permanent Regular Service',
+    selection_process: 'Competitive Written examination (Science, Agronomy basics, and GK) followed by a practical field assessment.',
+    application_fee: '₹150 for UR, ₹100 for SC/ST',
+    category_information: 'UR: 56, ST: 34, SC: 20',
+    experience_required: 'None',
+    important_dates: 'Apply online from 14 Sep 2026 to 20 Oct 2026.',
+    official_notification_url: 'https://krishi.tripura.gov.in/notifications/agri_assistant_22_2026.pdf',
+    official_apply_url: 'https://krishi.tripura.gov.in/apply',
+    source_url: 'https://krishi.tripura.gov.in',
+    notification_pdf_url: 'https://krishi.tripura.gov.in/notifications/agri_assistant_22_2026.pdf',
+    extracted_text: 'Department of Agriculture & Farmers Welfare, Government of Tripura invites online applications for direct recruitment to 110 posts of Agriculture Assistants Grade-II.',
+    summary: 'Agricultural extension recruitment for 110 Krishi Sahayaks to support farming communities in subdivisions.',
+    eligibility_summary: '10+2 Science pass with Biology/Agriculture. Age 18 to 40.',
+    status: 'ACTIVE',
+    is_new: true,
+    is_updated: false,
+    is_expired: false,
+    verified_from_official_source: true,
+    first_seen_at: new Date().toISOString(),
+    last_seen_at: new Date().toISOString(),
+    last_updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
   }
 ];
 
@@ -689,11 +947,22 @@ const NOTIFICATIONS_DB: UserNotification[] = [
 // Helper to recalculate status based on current date
 export function refreshJobStatuses() {
   const now = new Date();
+  const deletedJobIds: string[] = [];
+
   for (const [id, job] of JOBS_DB.entries()) {
     if (job.application_last_date && job.application_last_date !== 'Not specified in notification') {
       const lastDate = new Date(job.application_last_date);
       if (!isNaN(lastDate.getTime())) {
         const diffDays = Math.ceil((lastDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Auto-delete jobs that have been expired for more than 3 days
+        if (diffDays < -3) {
+          JOBS_DB.delete(id);
+          deletedJobIds.push(id);
+          console.log(`[AUTO-CLEANUP] Automatically deleted job notification expired for > 3 days: "${job.job_title}" (ID: ${id})`);
+          continue;
+        }
+
         if (diffDays < 0) {
           job.status = 'EXPIRED';
           job.is_expired = true;
@@ -704,6 +973,17 @@ export function refreshJobStatuses() {
           job.status = 'ACTIVE';
         }
       }
+    }
+  }
+
+  // Clean up any notifications linked to deleted jobs
+  if (deletedJobIds.length > 0) {
+    const originalLength = NOTIFICATIONS_DB.length;
+    const remaining = NOTIFICATIONS_DB.filter(n => !n.job_id || !deletedJobIds.includes(n.job_id));
+    if (remaining.length !== originalLength) {
+      NOTIFICATIONS_DB.length = 0;
+      NOTIFICATIONS_DB.push(...remaining);
+      console.log(`[AUTO-CLEANUP] Cleared ${originalLength - remaining.length} notifications linked to deleted jobs.`);
     }
   }
 }
@@ -959,98 +1239,36 @@ export const db = {
     return { success: true };
   },
 
-  // USER REGISTRATION & EMAIL OTP
-  sendPhoneOtp(emailOrPhone: string): { success: boolean; message: string; demoOtp: string } {
-    const identifier = emailOrPhone.trim().toLowerCase();
-    if (!identifier) {
-      throw new Error('Please enter a valid email or phone number.');
-    }
+  // CANDIDATE REGISTRATION & ID/PASS AUTHENTICATION
+  candidateRegister(fullName: string, email: string, district: string, phone?: string): { success: boolean; user: UserProfile } {
+    const cleanEmail = email.trim().toLowerCase();
 
-    // Cryptographically generate a stateless OTP based on the current 10-minute window
-    const OTP_SECRET = process.env.EMAIL_PASS || 'tripura-jobs-secret-key-12345';
-    const window = Math.floor(Date.now() / (10 * 60 * 1000));
-    const data = `${identifier}-${window}-${OTP_SECRET}`;
-    const hash = crypto.createHash('sha256').update(data).digest('hex');
-    const otpNum = (parseInt(hash.substring(0, 8), 16) % 900000) + 100000;
-    const otp = otpNum.toString();
-
-    console.log(`[AUTH-OTP] Generated stateless OTP for ${identifier}: ${otp}`);
-
-    // Trigger SMTP email sending in background if it's an email
-    if (identifier.includes('@')) {
-      sendOtpEmail(identifier, otp)
-        .then(res => {
-          if (!res.success) {
-            console.warn(`[AUTH-OTP] SMTP Mailer status: ${res.message}. If you have not set up EMAIL_USER/EMAIL_PASS in variables, look at this log or use fallback '123456'.`);
-          } else {
-            console.log(`[AUTH-OTP] Successfully sent real email to ${identifier}.`);
-          }
-        })
-        .catch(err => {
-          console.error('[AUTH-OTP] Error in background mailer:', err);
-        });
-    }
-
-    return {
-      success: true,
-      message: `OTP sent successfully to ${identifier}`,
-      demoOtp: otp,
-    };
-  },
-
-  verifyPhoneOtp(
-    emailOrPhone: string,
-    otpInput: string,
-    fullName?: string,
-    district?: string
-  ): { success: boolean; user?: UserProfile; error?: string } {
-    const identifier = emailOrPhone.trim().toLowerCase();
-    if (!identifier) {
-      return { success: false, error: 'Invalid identifier' };
-    }
-
-    const OTP_SECRET = process.env.EMAIL_PASS || 'tripura-jobs-secret-key-12345';
-    const trimInput = otpInput.trim();
-
-    // Verify statelessly against current and previous 10-minute window
-    const windowCurrent = Math.floor(Date.now() / (10 * 60 * 1000));
-    const hashCurrent = crypto.createHash('sha256').update(`${identifier}-${windowCurrent}-${OTP_SECRET}`).digest('hex');
-    const otpCurrent = ((parseInt(hashCurrent.substring(0, 8), 16) % 900000) + 100000).toString();
-
-    const windowPrev = windowCurrent - 1;
-    const hashPrev = crypto.createHash('sha256').update(`${identifier}-${windowPrev}-${OTP_SECRET}`).digest('hex');
-    const otpPrev = ((parseInt(hashPrev.substring(0, 8), 16) % 900000) + 100000).toString();
-
-    const isMasterOtp = trimInput === '123456';
-    const isMatch = trimInput === otpCurrent || trimInput === otpPrev;
-
-    if (!isMatch && !isMasterOtp) {
-      return {
-        success: false,
-        error: 'Incorrect OTP. Please check the 6-digit code or use 123456.',
-      };
-    }
-
-    let existingUser = Array.from(USER_PROFILES_DB.values()).find(
-      u => u.email === identifier || u.phone === identifier
+    // Check if user already exists by email
+    const existing = Array.from(USER_PROFILES_DB.values()).find(
+      u => u.email.toLowerCase() === cleanEmail
     );
 
-    if (existingUser) {
-      existingUser.is_phone_verified = true;
-      if (fullName && fullName.trim()) existingUser.full_name = fullName.trim();
-      if (district && district.trim()) existingUser.district = district.trim();
-      return { success: true, user: existingUser };
+    if (existing) {
+      if (!existing.login_id) {
+        existing.login_id = `TJ-${Math.floor(10000 + Math.random() * 90000)}`;
+        existing.password = Math.random().toString(36).substring(2, 8).toUpperCase();
+      }
+      return { success: true, user: existing };
     }
 
-    const isEmail = identifier.includes('@');
+    const login_id = `TJ-${Math.floor(10000 + Math.random() * 90000)}`;
+    const password = Math.random().toString(36).substring(2, 8).toUpperCase();
+
     const newUser: UserProfile = {
       id: `usr-cand-${Date.now()}`,
-      email: isEmail ? identifier : `${identifier}@tripurajobs.in`,
-      phone: isEmail ? undefined : identifier,
+      email: cleanEmail,
+      phone: phone || undefined,
       district: district || 'West Tripura (Agartala)',
       is_phone_verified: true,
-      full_name: (fullName && fullName.trim()) || `Candidate (${identifier.split('@')[0]})`,
+      full_name: fullName.trim() || 'Candidate',
       role: 'user',
+      login_id,
+      password,
       preferences: {
         notify_new_jobs: true,
         notify_closing_soon: true,
@@ -1062,6 +1280,21 @@ export const db = {
 
     USER_PROFILES_DB.set(newUser.id, newUser);
     return { success: true, user: newUser };
+  },
+
+  candidateLogin(loginId: string, pass: string): { success: boolean; user?: UserProfile; error?: string } {
+    const cleanId = (loginId || '').trim().toUpperCase();
+    const cleanPass = (pass || '').trim().toUpperCase();
+
+    const user = Array.from(USER_PROFILES_DB.values()).find(
+      u => (u.login_id?.toUpperCase() === cleanId || u.email.toUpperCase() === cleanId) && u.password?.toUpperCase() === cleanPass
+    );
+
+    if (!user) {
+      return { success: false, error: 'Incorrect User ID or Password. Please try again.' };
+    }
+
+    return { success: true, user };
   },
 
   getSupabaseInfo() {

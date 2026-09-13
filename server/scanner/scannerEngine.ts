@@ -1,10 +1,11 @@
 import crypto from 'crypto';
-import { db } from '../db';
-import { JobSource, JobRecord, ScanRun, ExtractedJobData } from './types';
-import { HtmlJobScanner } from './htmlScanner';
-import { AIJobExtractor } from './aiExtractor';
-import { DuplicateDetector } from './duplicateDetector';
-import { JobChangeDetector } from './changeDetector';
+import { db } from '../db.js';
+import { JobSource, JobRecord, ScanRun, ExtractedJobData } from './types.js';
+import { HtmlJobScanner } from './htmlScanner.js';
+import { AIJobExtractor } from './aiExtractor.js';
+import { DuplicateDetector } from './duplicateDetector.js';
+import { JobChangeDetector } from './changeDetector.js';
+import { AutonomousDiscoveryService } from './discoveryService.js';
 
 export class ScannerEngine {
   private static isScanning = false;
@@ -40,6 +41,13 @@ export class ScannerEngine {
     const runLogs: ScanRun[] = [];
 
     try {
+      // Run the dynamic, zero-maintenance official portal discovery service
+      try {
+        await AutonomousDiscoveryService.discoverAndRegisterPortals();
+      } catch (discoveryErr: any) {
+        console.warn('[JobScanner] Background government portal discovery experienced a minor interruption:', discoveryErr.message);
+      }
+
       let sources = db.getAllSources();
       if (targetSourceId) {
         sources = sources.filter(s => s.id === targetSourceId);

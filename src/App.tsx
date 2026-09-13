@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { JobProvider, useJobs } from './context/JobContext';
 import { AndroidFrame } from './components/AndroidFrame';
@@ -10,11 +10,15 @@ import { SavedJobsView } from './components/SavedJobsView';
 import { NotificationsView } from './components/NotificationsView';
 import { AdminView } from './components/AdminView';
 import { ProfileView } from './components/ProfileView';
+import { ExamScheduleAlerts } from './components/ExamScheduleAlerts';
 import {
   Inbox,
   ArrowRight,
   ShieldCheck,
   Search,
+  Radio,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 
 const MainAppContent: React.FC = () => {
@@ -30,79 +34,117 @@ const MainAppContent: React.FC = () => {
     resetFilters,
   } = useJobs();
 
+  const [homeSubTab, setHomeSubTab] = useState<'recruitment' | 'exams'>('recruitment');
+
   if (!isAuthenticated || !user) {
     return <UserAuthScreen />;
   }
+
+  // Count exam/interview related notifications
+  const examJobsCount = jobs.filter(job => job.exam_date || (job.selection_process && /exam|interview|test|written/i.test(job.selection_process))).length;
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
         return (
           <div className="space-y-0">
-            {/* Section Header */}
-            <div className="p-4 pb-2.5 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
-                <h2 className="text-sm font-extrabold text-slate-900 tracking-tight">
-                  Official Recruitment Notices
-                </h2>
-                <span className="text-xs font-bold text-slate-500">
-                  ({jobs.length})
-                </span>
+            {/* Dynamic Segmented Custom Navigation Switcher */}
+            <div className="p-3 pb-0.5">
+              <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200/60 shadow-xs">
+                <button
+                  onClick={() => setHomeSubTab('recruitment')}
+                  className={`relative flex items-center justify-center space-x-1.5 py-1.5 px-2.5 rounded-lg text-[11px] font-extrabold transition-all duration-300 ${
+                    homeSubTab === 'recruitment'
+                      ? 'bg-white text-slate-950 shadow-xs border border-slate-200/40 transform scale-[1.01]'
+                      : 'text-slate-500 hover:text-slate-850 hover:bg-slate-50/40'
+                  }`}
+                >
+                  <span className="inline-flex items-center">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+                    <span className="truncate">Recruitment</span>
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0 ${
+                    homeSubTab === 'recruitment' ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {jobs.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setHomeSubTab('exams')}
+                  className={`relative flex items-center justify-center space-x-1.5 py-1.5 px-2.5 rounded-lg text-[11px] font-extrabold transition-all duration-300 ${
+                    homeSubTab === 'exams'
+                      ? 'bg-white text-slate-950 shadow-xs border border-slate-200/40 transform scale-[1.01]'
+                      : 'text-slate-500 hover:text-slate-850 hover:bg-slate-50/40'
+                  }`}
+                >
+                  <span className="inline-flex items-center">
+                    <Calendar className="w-3 h-3 mr-1 text-red-500 shrink-0" />
+                    <span className="truncate">Exam Alerts</span>
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-bold shrink-0 ${
+                    homeSubTab === 'exams' ? 'bg-red-50 text-red-800' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {examJobsCount}
+                  </span>
+                </button>
               </div>
-
-              <button
-                onClick={() => setActiveTab('search')}
-                className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center space-x-1"
-              >
-                <span>Filter & Search</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
             </div>
 
-            {/* Quick search input */}
-            <div className="px-4 pb-3">
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  placeholder="Quick search (e.g., TPSC, Engineer, Teacher, Police)..."
-                  className="w-full bg-white text-xs rounded-xl pl-10 pr-4 py-2.5 border border-slate-300 text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 shadow-xs"
-                />
-              </div>
-            </div>
+            {homeSubTab === 'recruitment' ? (
+              <>
+                {/* Section Header */}
+                <div className="px-3.5 pt-3 pb-2 flex items-center">
+                  <div className="flex items-center space-x-1.5">
+                    <div className="relative flex items-center justify-center w-5 h-5 shrink-0 select-none">
+                      {/* Central solid red dot */}
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-600 z-10 animate-signal-glow"></span>
+                      {/* Rippling Signal Wave 1 */}
+                      <span className="absolute w-1.5 h-1.5 rounded-full border border-red-500/80 animate-signal-wave"></span>
+                    </div>
+                    <h2 className="text-xs font-black text-slate-900 tracking-tight">
+                      Official Recruitment Notices
+                    </h2>
+                    <span className="text-[10px] font-bold text-slate-500">
+                      ({jobs.length})
+                    </span>
+                  </div>
+                </div>
 
-            {/* Jobs List */}
-            <div className="px-4 pb-6 space-y-3">
-              {loading ? (
-                <div className="py-20 text-center text-slate-500 text-xs flex flex-col items-center justify-center space-y-2">
-                  <div className="w-7 h-7 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                  <span className="font-medium">Scanning and loading official Tripura notifications...</span>
+
+                {/* Jobs List */}
+                <div className="px-4 pb-6 space-y-3">
+                  {loading ? (
+                    <div className="py-20 text-center text-slate-500 text-xs flex flex-col items-center justify-center space-y-2">
+                      <div className="w-7 h-7 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                      <span className="font-medium">Scanning and loading official Tripura notifications...</span>
+                    </div>
+                  ) : error ? (
+                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-medium">
+                      {error}
+                    </div>
+                  ) : jobs.length === 0 ? (
+                    <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-3 shadow-xs">
+                      <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
+                      <h3 className="text-sm font-bold text-slate-900">No Matching Notifications</h3>
+                      <p className="text-xs text-slate-500">
+                        No active recruitment notices match the applied filter.
+                      </p>
+                      <button
+                        onClick={resetFilters}
+                        className="px-4 py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold hover:bg-slate-200 transition-colors"
+                      >
+                        Clear Filter
+                      </button>
+                    </div>
+                  ) : (
+                    jobs.map(job => <JobCard key={job.id} job={job} />)
+                  )}
                 </div>
-              ) : error ? (
-                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-medium">
-                  {error}
-                </div>
-              ) : jobs.length === 0 ? (
-                <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-3 shadow-xs">
-                  <Inbox className="w-10 h-10 text-slate-400 mx-auto" />
-                  <h3 className="text-sm font-bold text-slate-900">No Matching Notifications</h3>
-                  <p className="text-xs text-slate-500">
-                    No active recruitment notices match the applied filter.
-                  </p>
-                  <button
-                    onClick={resetFilters}
-                    className="px-4 py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold hover:bg-slate-200 transition-colors"
-                  >
-                    Clear Filter
-                  </button>
-                </div>
-              ) : (
-                jobs.map(job => <JobCard key={job.id} job={job} />)
-              )}
-            </div>
+              </>
+            ) : (
+              <ExamScheduleAlerts jobs={jobs} />
+            )}
 
             {/* Trust Footer */}
             <div className="px-4 py-4 border-t border-slate-200 bg-white text-center space-y-1">

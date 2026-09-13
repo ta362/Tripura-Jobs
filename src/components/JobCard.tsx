@@ -1,6 +1,7 @@
 import React from 'react';
 import { JobRecord } from '../types';
 import { useJobs } from '../context/JobContext';
+import { formatReadableDate } from '../utils/dateFormatter';
 import {
   Calendar,
   Users,
@@ -87,8 +88,8 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
       {/* Prominent Badges Row */}
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         {job.is_new && (
-          <span className="inline-flex items-center space-x-1 text-[11px] font-black bg-rose-600 text-white px-2 py-0.5 rounded-md shadow-xs">
-            <Sparkles className="w-3 h-3" />
+          <span className="inline-flex items-center space-x-0.5 text-[7px] font-black bg-red-600 text-white px-1.5 py-0.5 rounded-sm shadow-xs">
+            <Sparkles className="w-2 h-2" />
             <span>NEW</span>
           </span>
         )}
@@ -134,7 +135,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
           <span className="truncate">
             Last Date:{' '}
             <strong className="text-slate-900 font-bold">
-              {job.application_last_date}
+              {formatReadableDate(job.application_last_date)}
             </strong>
           </span>
         </div>

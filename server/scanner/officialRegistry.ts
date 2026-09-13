@@ -1,4 +1,4 @@
-import { FetchedNotificationItem } from './htmlScanner';
+import { FetchedNotificationItem } from './htmlScanner.js';
 
 /**
  * Official verified notification registry for Tripura Government portals.
