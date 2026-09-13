@@ -57,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         success: true,
         message: `OTP generated locally for ${cleanIdentifier}`,
         demoOtp: localOtp,
+        isSmtpConfigured: false,
       };
     }
   };
