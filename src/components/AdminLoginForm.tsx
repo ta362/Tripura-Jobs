@@ -7,9 +7,7 @@ import {
   Eye,
   EyeOff,
   AlertCircle,
-  KeyRound,
   CheckCircle2,
-  Sparkles,
 } from 'lucide-react';
 
 interface AdminLoginFormProps {
@@ -72,34 +70,6 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => 
           <p className="text-xs text-slate-500 font-medium max-w-xs mx-auto">
             Please enter your Admin Login ID and Password to access the recruitment portal console.
           </p>
-        </div>
-
-        {/* Quick Demo Credentials Helper */}
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-700">
-              <KeyRound className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Default Credentials:</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleQuickFillDemo}
-              className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all active:scale-95"
-            >
-              <Sparkles className="w-3 h-3" />
-              <span>Auto-Fill</span>
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="bg-white px-2.5 py-1.5 rounded-xl border border-slate-200">
-              <span className="text-[10px] text-slate-400 block font-medium">Login ID</span>
-              <span className="font-mono font-bold text-slate-800">admin</span>
-            </div>
-            <div className="bg-white px-2.5 py-1.5 rounded-xl border border-slate-200">
-              <span className="text-[10px] text-slate-400 block font-medium">Password</span>
-              <span className="font-mono font-bold text-slate-800">admin123</span>
-            </div>
-          </div>
         </div>
 
         {/* Error Alert */}

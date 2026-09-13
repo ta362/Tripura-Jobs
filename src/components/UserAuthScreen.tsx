@@ -6,7 +6,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   ArrowRight,
   Shield,
   RotateCcw,
@@ -181,24 +180,6 @@ export const UserAuthScreen: React.FC = () => {
                   <p className="text-xs text-slate-500 font-medium mt-0.5">
                     Enter your mobile number to receive official Tripura job notifications via OTP.
                   </p>
-                </div>
-
-                {/* Quick Auto-Fill Demo Helper */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center justify-between text-xs">
-                  <div className="flex items-center space-x-2">
-                    <Sparkles className="w-4 h-4 text-emerald-600" />
-                    <div>
-                      <span className="font-bold text-slate-800 block">First-time visitor demo:</span>
-                      <span className="text-[11px] text-slate-500">+91 98620 12345</span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleAutoFillDemo}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold shadow-xs transition-all active:scale-95"
-                  >
-                    Quick Fill
-                  </button>
                 </div>
 
                 {errorMsg && (
