@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { JobRecord, ExtractedJobData, JobUpdate } from './types.js';
+import { JobRecord, ExtractedJobData, JobUpdate } from './types';
 
 export interface ChangeDetectionResult {
   hasChanges: boolean;

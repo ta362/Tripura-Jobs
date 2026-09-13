@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto';
-import { ExtractedJobData } from './types.js';
+import { ExtractedJobData } from './types';
 
 let genAI: GoogleGenAI | null = null;
 

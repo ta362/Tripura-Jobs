@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import { db } from '../db.js';
-import { JobSource, JobRecord, ScanRun, ExtractedJobData } from './types.js';
-import { HtmlJobScanner } from './htmlScanner.js';
-import { AIJobExtractor } from './aiExtractor.js';
-import { DuplicateDetector } from './duplicateDetector.js';
-import { JobChangeDetector } from './changeDetector.js';
+import { db } from '../db';
+import { JobSource, JobRecord, ScanRun, ExtractedJobData } from './types';
+import { HtmlJobScanner } from './htmlScanner';
+import { AIJobExtractor } from './aiExtractor';
+import { DuplicateDetector } from './duplicateDetector';
+import { JobChangeDetector } from './changeDetector';
 
 export class ScannerEngine {
   private static isScanning = false;

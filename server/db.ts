@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { sendOtpEmail } from './mailer.js';
+import { sendOtpEmail } from './mailer';
 import {
   JobRecord,
   JobSource,
@@ -9,9 +9,9 @@ import {
   UserProfile,
   SavedJob,
   UserNotification,
-} from './scanner/types.js';
-import { INITIAL_JOB_SOURCES } from './scanner/sources.js';
-import { DuplicateDetector } from './scanner/duplicateDetector.js';
+} from './scanner/types';
+import { INITIAL_JOB_SOURCES } from './scanner/sources';
+import { DuplicateDetector } from './scanner/duplicateDetector';
 
 // Supabase client instance (configured with project URL https://fnanpfwiyxzgpjutqndb.supabase.co)
 export const DEFAULT_SUPABASE_PROJECT_URL = 'https://fnanpfwiyxzgpjutqndb.supabase.co';

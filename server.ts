@@ -2,8 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
-import { db } from './server/db.js';
-import { ScannerEngine } from './server/scanner/scannerEngine.js';
+import { db } from './server/db';
+import { ScannerEngine } from './server/scanner/scannerEngine';
 
 const app = express();
 const PORT = 3000;

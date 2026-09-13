@@ -1,4 +1,4 @@
-import { JobSource } from './types.js';
+import { JobSource } from './types';
 
 export const INITIAL_JOB_SOURCES: JobSource[] = [
   {

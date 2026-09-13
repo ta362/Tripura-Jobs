@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { JobRecord, ExtractedJobData } from './types.js';
+import { JobRecord, ExtractedJobData } from './types';
 
 export class DuplicateDetector {
   /**
