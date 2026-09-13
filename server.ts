@@ -243,6 +243,7 @@ async function startServer() {
         success: true,
         message: result.message,
         demoOtp: result.demoOtp, // Delivered to client simulator for seamless experience
+        isSmtpConfigured: !!(process.env.EMAIL_USER && process.env.EMAIL_PASS),
       });
     } catch (err: any) {
       res.status(400).json({ success: false, error: err.message || 'Failed to send OTP' });

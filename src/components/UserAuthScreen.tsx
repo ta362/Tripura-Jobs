@@ -42,6 +42,7 @@ export const UserAuthScreen: React.FC = () => {
   const [activeOtpCode, setActiveOtpCode] = useState<string>('');
   const [timer, setTimer] = useState(180);
   const [canResend, setCanResend] = useState(false);
+  const [isSmtpConfigured, setIsSmtpConfigured] = useState<boolean>(true);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -68,6 +69,9 @@ export const UserAuthScreen: React.FC = () => {
       setErrorMsg(null);
       const res = await sendPhoneOtp(cleanEmail);
       setActiveOtpCode(res.demoOtp);
+      if (res.isSmtpConfigured !== undefined) {
+        setIsSmtpConfigured(res.isSmtpConfigured);
+      }
       setStep('otp');
       setTimer(180);
       setCanResend(false);
@@ -360,6 +364,12 @@ export const UserAuthScreen: React.FC = () => {
                       </>
                     )}
                   </button>
+
+                  {!isSmtpConfigured && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-amber-800 text-[11px] font-medium leading-relaxed text-center">
+                      ⚠️ <strong>SMTP Server is not configured.</strong> Real emails cannot be sent. To test or login immediately, enter the code: <strong className="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-200 font-mono text-xs">{activeOtpCode || '123456'}</strong> or use <strong>123456</strong>.
+                    </div>
+                  )}
                 </form>
               </>
             )}

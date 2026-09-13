@@ -6,7 +6,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isAdmin: boolean;
   isAuthenticated: boolean;
-  sendPhoneOtp: (emailOrPhone: string) => Promise<{ success: boolean; message: string; demoOtp: string }>;
+  sendPhoneOtp: (emailOrPhone: string) => Promise<{ success: boolean; message: string; demoOtp: string; isSmtpConfigured?: boolean }>;
   verifyPhoneOtp: (emailOrPhone: string, otp: string, fullName?: string, district?: string) => Promise<void>;
   login: (email: string, pass: string) => Promise<void>;
   adminLogin: (loginId: string, pass: string) => Promise<void>;

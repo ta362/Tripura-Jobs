@@ -151,7 +151,7 @@ export const api = {
   },
 
   // Auth: Email OTP
-  async sendOtp(email: string): Promise<{ success: boolean; message: string; demoOtp: string }> {
+  async sendOtp(email: string): Promise<{ success: boolean; message: string; demoOtp: string; isSmtpConfigured?: boolean }> {
     const res = await fetch('/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
