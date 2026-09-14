@@ -1016,6 +1016,8 @@ export const db = {
       }
       if (filters.status) {
         jobs = jobs.filter(j => j.status === filters.status);
+      } else {
+        jobs = jobs.filter(j => j.status !== 'EXPIRED');
       }
       if (filters.is_new) {
         jobs = jobs.filter(j => j.is_new);
@@ -1030,6 +1032,8 @@ export const db = {
         const qual = filters.qualification.toLowerCase();
         jobs = jobs.filter(j => j.qualification.toLowerCase().includes(qual));
       }
+    } else {
+      jobs = jobs.filter(j => j.status !== 'EXPIRED');
     }
 
     // Default sorting: Newest and Closing Soon on top, then active, then expired
