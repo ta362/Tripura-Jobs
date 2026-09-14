@@ -1041,19 +1041,14 @@ export function refreshJobStatuses() {
       if (!isNaN(lastDate.getTime())) {
         const diffDays = Math.ceil((lastDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         
-        // Auto-delete jobs that have been expired for more than 3 days
-        if (diffDays < -3) {
+        // Auto-delete jobs as soon as last date passes (diffDays < 0)
+        if (diffDays < 0) {
           JOBS_DB.delete(id);
           deletedJobIds.push(id);
-          console.log(`[AUTO-CLEANUP] Automatically deleted job notification expired for > 3 days: "${job.job_title}" (ID: ${id})`);
+          console.log(`[AUTO-CLEANUP] Automatically deleted expired job notification (Last date passed): "${job.job_title}" (ID: ${id})`);
           continue;
         }
-
-        if (diffDays < 0) {
-          job.status = 'EXPIRED';
-          job.is_expired = true;
-          job.is_new = false;
-        } else if (diffDays <= 5) {
+        if (diffDays <= 5) {
           job.status = 'CLOSING_SOON';
         } else {
           job.status = 'ACTIVE';

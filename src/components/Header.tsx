@@ -1,13 +1,10 @@
 import React from 'react';
 import { useJobs } from '../context/JobContext';
-import { Bell, Search, ShieldCheck, RefreshCw, Menu } from 'lucide-react';
+import { Search, ShieldCheck, Menu } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
-    unreadNotificationsCount,
     setActiveTab,
-    isScanning,
-    triggerScan,
     toggleSidebar,
   } = useJobs();
 
@@ -51,15 +48,6 @@ export const Header: React.FC = () => {
 
         {/* Right Action Icons */}
         <div className="flex items-center space-x-1.5">
-          {/* Quick Trigger Scan button */}
-          <button
-            onClick={() => triggerScan()}
-            disabled={isScanning}
-            title="Scan official Tripura portals now"
-            className="p-2 text-slate-600 hover:text-emerald-700 hover:bg-slate-100 rounded-full transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isScanning ? 'animate-spin text-emerald-600' : ''}`} />
-          </button>
 
           {/* Search Button */}
           <button
@@ -70,19 +58,7 @@ export const Header: React.FC = () => {
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Notifications with Unread Badge */}
-          <button
-            onClick={() => setActiveTab('notifications')}
-            title="Notifications"
-            className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors relative"
-          >
-            <Bell className="w-4 h-4" />
-            {unreadNotificationsCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-rose-600 text-[10px] font-bold text-white rounded-full flex items-center justify-center animate-pulse">
-                {unreadNotificationsCount}
-              </span>
-            )}
-          </button>
+
         </div>
       </div>
     </header>
