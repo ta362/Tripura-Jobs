@@ -79,16 +79,16 @@ Return valid JSON array of objects:
         let response;
         try {
           response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
+            model: 'gemini-3.5-flash',
             contents: prompt,
             config: {
               responseMimeType: 'application/json',
             }
           });
         } catch (primaryErr: any) {
-          console.warn('[AutoDiscovery] Primary model gemini-3.8-flash busy, falling back to gemini-2.5-flash...', primaryErr.message);
+          console.warn('[AutoDiscovery] Primary model gemini-3.5-flash busy, falling back...', primaryErr.message);
           response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.5-flash',
             contents: prompt,
             config: {
               responseMimeType: 'application/json',

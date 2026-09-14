@@ -343,6 +343,22 @@ app.use(express.json());
   if (process.env.VERCEL !== '1') {
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Tripura Govt Job Scanner running on port ${PORT}`);
+      
+      // Automatic background scan every 1 minute as requested
+      console.log('[JobScanner] Auto-scanning scheduled to run every 1 minute.');
+      setInterval(async () => {
+        try {
+          if (!ScannerEngine.isBusy()) {
+            console.log('[JobScanner] Starting 1-minute auto-scan cycle...');
+            const result = await ScannerEngine.executeScan();
+            console.log(`[JobScanner] Auto-scan cycle complete. New: ${result.newJobsFound}, Updated: ${result.updatedJobs}`);
+          } else {
+            console.log('[JobScanner] Auto-scan cycle skipped (another scan is currently running).');
+          }
+        } catch (err: any) {
+          console.error('[JobScanner] Auto-scan cycle error:', err.message);
+        }
+      }, 60 * 1000);
     });
   }
 

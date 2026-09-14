@@ -23,15 +23,30 @@ export const ExamScheduleAlerts: React.FC<ExamScheduleAlertsProps> = ({ jobs }) 
   const { setSelectedJob, savedJobIds, toggleSave } = useJobs();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filter jobs that have a valid exam_date or contain exam/interview info in selection process
+  // Filter only official exam notices (exclude general recruitment jobs)
   const examJobs = jobs.filter(job => {
+    const title = job.job_title.toLowerCase();
+    const isExamNoticeType = job.vacancy_count === null || job.vacancy_count === 0 || 
+      title.includes('tet') || 
+      title.includes('test') || 
+      title.includes('exam schedule') || 
+      title.includes('admit card') || 
+      title.includes('syllabus') || 
+      title.includes('answer key') || 
+      title.includes('exam notice') || 
+      title.includes('written examination schedule');
+    
+    const isDirectRecruitmentJob = job.vacancy_count !== null && job.vacancy_count > 0 && 
+      (title.includes('recruitment') || title.includes('posts') || title.includes('grade-ii') || title.includes('junior engineer') || title.includes('sub-inspector') || title.includes('lower division clerk') || title.includes('medical officer'));
+
+    const isOfficialExamNotice = isExamNoticeType && !isDirectRecruitmentJob && Boolean(job.exam_date);
+
     const matchesSearch = 
       job.job_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.organization_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (job.selection_process && job.selection_process.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Must have an exam date, or explicitly state selection dates
-    return matchesSearch && (job.exam_date || (job.selection_process && /exam|interview|test|written/i.test(job.selection_process)));
+    return matchesSearch && isOfficialExamNotice;
   });
 
   // Sort upcoming exams chronologically (nearest first)

@@ -108,6 +108,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     refreshStatus();
+    // Refresh scanner status every 15 seconds to catch ongoing scans
     const interval = setInterval(refreshStatus, 15000);
     return () => clearInterval(interval);
   }, [refreshStatus]);
@@ -116,6 +117,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshNotifications();
     refreshSaved();
   }, [refreshNotifications, refreshSaved]);
+
+  // Periodic 1-minute auto-update for jobs and notifications to sync with the background scanner
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshJobs();
+      refreshNotifications();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [refreshJobs, refreshNotifications]);
 
   const toggleSave = async (jobId: string) => {
     if (!user) return;

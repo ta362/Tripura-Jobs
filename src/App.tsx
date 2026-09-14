@@ -40,8 +40,24 @@ const MainAppContent: React.FC = () => {
     return <UserAuthScreen />;
   }
 
-  // Count exam/interview related notifications
-  const examJobsCount = jobs.filter(job => job.exam_date || (job.selection_process && /exam|interview|test|written/i.test(job.selection_process))).length;
+  // Count official exam notices only
+  const examJobsCount = jobs.filter(job => {
+    const title = job.job_title.toLowerCase();
+    const isExamNoticeType = job.vacancy_count === null || job.vacancy_count === 0 || 
+      title.includes('tet') || 
+      title.includes('test') || 
+      title.includes('exam schedule') || 
+      title.includes('admit card') || 
+      title.includes('syllabus') || 
+      title.includes('answer key') || 
+      title.includes('exam notice') || 
+      title.includes('written examination schedule');
+    
+    const isDirectRecruitmentJob = job.vacancy_count !== null && job.vacancy_count > 0 && 
+      (title.includes('recruitment') || title.includes('posts') || title.includes('grade-ii') || title.includes('junior engineer') || title.includes('sub-inspector') || title.includes('lower division clerk') || title.includes('medical officer'));
+
+    return isExamNoticeType && !isDirectRecruitmentJob && Boolean(job.exam_date);
+  }).length;
 
   const renderTabContent = () => {
     switch (activeTab) {
