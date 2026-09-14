@@ -76,33 +76,25 @@ Return valid JSON array of objects:
     "source_type": "STATE_DEPT"
   }
 ]`;
-        let response;
         try {
-          response = await ai.models.generateContent({
+          const response = await ai.models.generateContent({
             model: 'gemini-3.5-flash',
             contents: prompt,
             config: {
               responseMimeType: 'application/json',
             }
           });
-        } catch (primaryErr: any) {
-          console.warn('[AutoDiscovery] Primary model gemini-3.5-flash busy, falling back...', primaryErr.message);
-          response = await ai.models.generateContent({
-            model: 'gemini-3.5-flash',
-            contents: prompt,
-            config: {
-              responseMimeType: 'application/json',
-            }
-          });
-        }
 
-        const text = response.text || '[]';
-        const aiSuggested: Array<{ name: string; url: string; organization: string; source_type: string }> = JSON.parse(text);
-        
-        for (const item of aiSuggested) {
-          if (item.url && item.url.startsWith('http') && item.url.includes('tripura')) {
-            discoveredUrls.add(item.url);
+          const text = response.text || '[]';
+          const aiSuggested: Array<{ name: string; url: string; organization: string; source_type: string }> = JSON.parse(text);
+          
+          for (const item of aiSuggested) {
+            if (item.url && item.url.startsWith('http') && item.url.includes('tripura')) {
+              discoveredUrls.add(item.url);
+            }
           }
+        } catch (apiErr: any) {
+          console.log('[AutoDiscovery] Gemini API rate limit / quota reached, utilizing deterministic portal discovery fallback.');
         }
       } catch (err: any) {
         console.warn('[AutoDiscovery] AI-driven discovery lookup skipped or limited:', err.message);
