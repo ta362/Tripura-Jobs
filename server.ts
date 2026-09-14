@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { db } from './server/db.js';
 import { ScannerEngine } from './server/scanner/scannerEngine.js';
+import { AIGuardian } from './server/aiGuardian.js';
 
 const app = express();
 const PORT = 3000;
@@ -308,6 +309,25 @@ app.use(express.json());
     });
   });
 
+  // AI Guardian & Self-Healing Sentinel Endpoints
+  app.get('/api/ai-guardian/status', (req, res) => {
+    try {
+      const status = AIGuardian.getStatus();
+      res.json({ success: true, data: status });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  app.post('/api/ai-guardian/heal', (req, res) => {
+    try {
+      const result = AIGuardian.runAutoDiagnosisAndHeal();
+      res.json({ success: true, ...result });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // Supabase SQL script endpoint for one-click setup
   app.get('/api/schema.sql', (req, res) => {
     const schemaPath = path.join(process.cwd(), 'server', 'supabaseSchema.sql');
@@ -359,6 +379,17 @@ app.use(express.json());
           console.error('[JobScanner] Auto-scan cycle error:', err.message);
         }
       }, 60 * 1000);
+
+      // AI Guardian Autonomous Self-Healing Sentinel Loop every 2 minutes
+      console.log('[AIGuardian] Sentinel auto-heal monitor active (checking every 2 minutes).');
+      setInterval(() => {
+        try {
+          const healRes = AIGuardian.runAutoDiagnosisAndHeal();
+          console.log(`[AIGuardian Sentinel] Autonomous check complete. Status: ${healRes.summary}`);
+        } catch (err: any) {
+          console.error('[AIGuardian Sentinel] Self-heal check error:', err.message);
+        }
+      }, 2 * 60 * 1000);
     });
   }
 

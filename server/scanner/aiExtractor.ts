@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import crypto from 'crypto';
 import { ExtractedJobData } from './types.js';
+import { getVerifiedOfficialApplyUrl } from '../utils/urlMapper.js';
 
 let genAI: GoogleGenAI | null = null;
 
@@ -126,7 +127,7 @@ Return valid JSON with:
               selection_process: parsed.selection_process || 'Written Examination / Interview as per official notice',
               application_fee: parsed.application_fee || 'As per Tripura Govt norms',
               official_notification_url: parsed.official_notification_url || sourceUrl,
-              official_apply_url: parsed.official_apply_url || sourceUrl,
+              official_apply_url: getVerifiedOfficialApplyUrl(parsed.organization_name || sourceOrg, parsed.official_apply_url, sourceUrl),
               summary: parsed.summary || `${parsed.job_title} notification published by ${sourceOrg}.`,
               eligibility_summary: parsed.eligibility_summary || parsed.qualification || 'Refer to official advertisement.'
             };

@@ -12,6 +12,7 @@ import { AdminView } from './components/AdminView';
 import { ProfileView } from './components/ProfileView';
 import { ExamScheduleAlerts } from './components/ExamScheduleAlerts';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { AIGuardianWidget } from './components/AIGuardianWidget';
 import {
   Inbox,
   ArrowRight,
@@ -226,6 +227,7 @@ const MainAppContent: React.FC = () => {
       {renderTabContent()}
       <JobDetailsModal />
       <PWAInstallBanner />
+      <AIGuardianWidget />
     </AndroidFrame>
   );
 };

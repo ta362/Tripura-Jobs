@@ -6,6 +6,7 @@ import { AIJobExtractor } from './aiExtractor.js';
 import { DuplicateDetector } from './duplicateDetector.js';
 import { JobChangeDetector } from './changeDetector.js';
 import { AutonomousDiscoveryService } from './discoveryService.js';
+import { getVerifiedOfficialApplyUrl } from '../utils/urlMapper.js';
 
 export class ScannerEngine {
   private static isScanning = false;
@@ -151,7 +152,7 @@ export class ScannerEngine {
                 experience_required: 'Not specified in notification',
                 important_dates: `Notification Date: ${extracted.notification_date}, Last Date: ${extracted.application_last_date}`,
                 official_notification_url: extracted.official_notification_url || item.sourceUrl,
-                official_apply_url: extracted.official_apply_url || source.url,
+                official_apply_url: getVerifiedOfficialApplyUrl(extracted.organization_name || source.organization, extracted.official_apply_url, source.url),
                 source_url: source.url,
                 notification_pdf_url: item.pdfUrl || null,
                 extracted_text: item.rawText,
