@@ -11,6 +11,7 @@ import { NotificationsView } from './components/NotificationsView';
 import { AdminView } from './components/AdminView';
 import { ProfileView } from './components/ProfileView';
 import { ExamScheduleAlerts } from './components/ExamScheduleAlerts';
+import { PWAInstallBanner } from './components/PWAInstallBanner';
 import {
   Inbox,
   ArrowRight,
@@ -224,6 +225,7 @@ const MainAppContent: React.FC = () => {
     <AndroidFrame>
       {renderTabContent()}
       <JobDetailsModal />
+      <PWAInstallBanner />
     </AndroidFrame>
   );
 };
